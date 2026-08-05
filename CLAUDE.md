@@ -20,7 +20,7 @@ it manages anything. A dashboard is the next goal, but it is a **separate applic
 see §2 before you act on that.
 
 ```text
-index.html                 landing page + its inline icon sprite (18 symbols)
+index.html                 landing page + its inline icon sprite (22 symbols)
 updates.html               changelog + its own sprite (1 symbol)
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
@@ -142,22 +142,83 @@ command the bot does not answer to is worse than one listing nothing.
 Two places go stale when the bot's command surface changes, and only these two:
 
 1. the `.chip` lists in `#features`
-2. `#commands` — the full reference: **6 groups, 33 subcommand rows**
+2. `#commands` — the full reference: **9 groups, 45 subcommand rows**
 
 Both are plain HTML in `index.html`. No generator; sync by hand.
 
 **This has already gone wrong.** The page originally advertised prefix commands
 (`!طرد`, `!حظر`, `!اسكات`, `!تحذير`), a per-server prefix feature, and a rate-limit card with
-an invented `!تهدئة` command. The bot registers **slash commands only** — none of that
-existed. It is all gone.
+an invented `!تهدئة` command. The bot registered **slash commands only** at the time — none
+of that existed. It is all gone.
 
 **`/prefix` is deliberately not listed.** The command group exists and writes a prefix, but
 no prefix commands are registered, so setting one has no user-visible effect. Listing it
 would advertise a no-op.
 
-The five real systems: moderation, automod (banned words + spam + raid detection), welcome,
-account-age gate, captcha. Plus Arabic duration parsing, which is the most distinctive
-feature and is worth keeping prominent.
+**In-chat moderation triggers exist but are deliberately not enumerated.** The bot now
+recognizes a few plain Arabic words typed directly in chat as shortcuts for ban/timeout/
+untimeout/warn — a deliberate, owner-approved exception on the bot side to "slash commands
+only," each trigger gated by the same permission its slash equivalent uses and silent for
+anyone lacking it. The "أوامر واضحة" card in `#features` mentions this in one generic
+sentence — no trigger words, no mention that they're per-deployment configurable — on
+purpose: naming them here would be this site publishing exactly what the bot's own design
+keeps unlisted. **Never add a `#commands` row for these** — they are not slash commands, and
+`#commands`'s own lede claims everything listed there is one.
+
+**Shortcuts are a separate feature from the in-chat triggers above, and are listed.**
+`/اختصار` (Administrator) is a real registered slash command that lets a server admin
+define their *own* trigger word — any word they pick, stored per guild — that maps to
+ban, kick, or timeout. It is a fourth feature in the bot's settings layer, a peer of
+agegate/captcha/tickets, not a sub-feature of moderation, so it gets the same treatment
+those three got: its own bento card (`اختصارات نصية`, icon `i-lightning`) and its own
+`#commands` group. Publishing that it exists reveals nothing guild-specific — the word is
+the admin's own choice, not a fixed set the bot ships with — and an admin has to know
+`/اختصار` exists to configure it, so unlike the fixed triggers, hiding it would only make
+the feature unusable. Its pill reads **مدير السيرفر**, matching `بوابة عمر الحساب` — both
+are strictly Administrator-only, not the Administrator-or-Manage-Server tier `/about`
+uses, so they get the stricter wording, not `إدارة السيرفر`.
+
+**`/اختصار` is the one Arabic command name on the page**, so its `.cmd__name` carries no
+`dir="ltr"` — the surrounding rows use that attribute to isolate a *Latin* name from RTL
+reordering, and applying it to real Arabic text would reverse it, which is a different
+failure than the zigzag it prevents for Latin names. It gets `.cmd__name--ar` instead:
+`text-align: start` right-aligns it to the same edge as every other row (its direction is
+left at the ambient RTL, where `start` is the right edge — no `dir` override needed to get
+there), and the font swaps off `--mono` (no Arabic glyphs) the same way `.chip--ar` does
+for a chip. See §5 for the icon-sourcing rule this icon was fetched under.
+
+**`#commands` grew from 7 groups to 9 across two separate reasons — do not conflate them.**
+First, `/about` and `/serverinfo` stopped sharing one permission: `/about` became an
+admin-only command manual, auto-generated from the bot's live command tree (gated to
+Administrator-or-Manage-Server on the bot side); `/serverinfo` stayed public. One group can
+only carry one permission pill, so `/about` got its own single-command group
+(`دليل الأوامر`, icon `i-book`) instead of forcing a false shared pill onto `معلومات`
+(7 → 8). Its pill reads **إدارة السيرفر** — the same wording already used for
+automod/welcome/captcha/tickets, not new wording — because Discord's Administrator
+permission bypasses every lesser check anyway, so "Administrator or Manage Server" and plain
+"Manage Server" gate the exact same set of members in practice. `/musaed` (a public,
+DM-capable "what is this bot" command with an invite-link button) took `/about`'s old seat
+in `معلومات` next to `/serverinfo`. Second, unrelated to any of that, the shortcuts feature
+above shipped its own group (8 → 9).
+
+**When the bot-side project guide gets pasted into a session, diff it against this site
+before touching anything else.** Three times now the bot's own `CLAUDE.md`/guide has been
+shared mid-conversation and each time the site had silently fallen behind: round one, a
+whole feature (`/tickets`) plus a subcommand (`/captcha status`) were missing; round two, a
+permission had changed underneath an already-published command (`/about`); round three, a
+second whole feature (`/اختصار`/shortcuts) was missing *and* an already-listed group had
+grown four subcommands the site never got (`/tickets add/remove/list/edit`, ticket-type
+management) — two gaps at once, in the same group and in a brand-new one, which is exactly
+why a partial glance at the diff isn't enough. None of these show up by reading this site's
+own files — they only show up by comparing against the bot's current command surface. If
+you're handed that guide, read §4, §7 (or wherever the
+bot repo lists its commands/permissions) and cross-check every group and row here before
+doing anything else asked of you.
+
+The seven real systems: moderation, automod (banned words + spam + raid detection), welcome,
+account-age gate, captcha, support tickets, text shortcuts (admin-defined trigger words for
+ban/kick/timeout). Plus Arabic duration parsing, which is the most distinctive feature and
+is worth keeping prominent.
 
 **`#trust` quotes no numbers** for retention windows or automod thresholds — those are
 server-configurable defaults, not promises. Do not add figures there.
@@ -179,6 +240,15 @@ server-configurable defaults, not promises. Do not add figures there.
   (17 in `styles.css`, 12 in `updates.css`, 7 in `legal.css`).
 - The Discord mark renders in **5 places**, all on `index.html`. White via
   `filter: brightness(0) invert(1)` on blurple; natural colour on dark panels.
+- **New sprite icons must come from the compiled Phosphor source, never hand-drawn and
+  never fetched through `WebFetch`.** Pull the exact path from
+  `https://raw.githubusercontent.com/phosphor-icons/core/main/assets/regular/<name>.svg`
+  via `curl`/Bash — that's the compiled single-`<path>` fill version matching every existing
+  symbol. `WebFetch` converts pages to markdown through a summarizing model and will mangle
+  a long `d="..."` attribute. The repo's `raw/regular/<name>.svg` path (note: `raw/`, not
+  `assets/`) is a *different*, stroke-based editable source (`<line>`/`<path stroke=...>`)
+  and will not match the sprite's style if copied in directly — it has to be the `assets/`
+  one.
 - **Motion is opacity and transform only**, fully disabled under `prefers-reduced-motion`.
   There are no scroll event listeners anywhere — scroll-linked effects use native CSS
   scroll-driven timelines behind `@supports`.
@@ -204,10 +274,18 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   the leading slash stays left — but `dir` also flips the block's own alignment, so
   `.cmd__name` sets `text-align: end`, which resolves against the element's *own* `ltr`
   direction and therefore means right. Together they put names on the page's reading edge
-  with characters running left to right. **44 `dir="ltr"` attributes: 33 command names + 11
-  Latin chips.** Drop either half and you get a zigzag, or a slash on the wrong side.
+  with characters running left to right. **55 `dir="ltr"` attributes: 44 command names + 11
+  Latin chips**, out of 45 total command rows. Drop either half and you get a zigzag, or a
+  slash on the wrong side.
+- **`/اختصار` is the one Arabic command name, and it must NOT get `dir="ltr"`.** That
+  attribute isolates *Latin* text from RTL reordering; applying it to real Arabic text
+  reverses it, which is a worse failure than the zigzag it prevents elsewhere. Use
+  `.cmd__name--ar` instead — `text-align: start`, which right-aligns it to the same edge
+  as every `dir="ltr"` row, because the element is left at its natural (inherited) RTL
+  direction, where `start` already means right. No `dir` override needed or wanted.
 - **A chip containing Arabic needs `.chip--ar`.** Plex Mono has no Arabic glyphs, so `--mono`
-  falls back part-way through the string and opens a wide gap.
+  falls back part-way through the string and opens a wide gap. `.cmd__name--ar` swaps off
+  `--mono` for the same reason.
 - **`.reveal` grids must be added to `GROUPS` in `main.js`** or their children all land at
   once instead of sequencing. Currently:
   `.bento, .cmds, .stats, .guards, .team, .about`.
@@ -225,10 +303,18 @@ Each of these was found by measuring, and each looks harmless to "clean up".
 ### Measured width limits
 
 - **320px** is where the nav bar breaks first — about **6px of slack**. Widening the brand,
-  the menu button, or the CTA overflows there before anywhere else.
+  the menu button, or the CTA overflows there before anywhere else. This is why
+  `.nav__login` (the icon-only login link beside the CTA) is hidden below 768px
+  instead of squeezed in here — there is no slack left to give it.
 - **768px** is where the **6** nav links first share one line with the brand and CTA.
   Measured slack: **69.8px**. A seventh link costs roughly 75px, so it would not fit —
   re-measure before adding one, and prefer a footer-only link.
+
+  **This figure is now stale for what actually renders here.** `.nav__login` was added
+  beside the CTA at this exact breakpoint (44px + the 18px `nav__inner` gap ≈ 62px) on an
+  estimate that it fits under the measured 69.8px, not on a re-measurement — no headless
+  browser was available when it was added. Re-measure the real slack at 768px before
+  trusting either number, and before adding anything else here.
 
 ---
 
@@ -266,7 +352,7 @@ sends plain `&`.
 
 **`updates.html` has zero `data-mock`** — its single release (`1.0.0`, `أغسطس 2026`, `البداية`)
 is real, owner-supplied. Its two header figures are kept in step by hand: `إصدارات` counts
-the `.rel` blocks (**1**), `أنظمة` mirrors the five systems `#features` advertises (**5**).
+the `.rel` blocks (**1**), `أنظمة` mirrors the seven systems `#features` advertises (**7**).
 **Do not add a release you cannot date.**
 
 **Live network surface: exactly one `fetch`, and it is unreachable.** `readStats()` returns
@@ -285,9 +371,13 @@ written literally.
 grep -ohE 'https://[a-z0-9.-]+' *.html | sort -u
 ```
 
-That must print exactly three hosts: the site's, `discord.gg` for the community invite
-(`https://discord.gg/QvNXvDDFtz` — **live, not a placeholder**), and `discord.com` for the
-bot-invite URL and the link to Discord's own terms.
+That must print exactly four hosts: the site's, `discord.gg` for the community invite
+(`https://discord.gg/QvNXvDDFtz` — **live, not a placeholder**), `discord.com` for the
+bot-invite URL and the link to Discord's own terms, and
+`musaed-dashboard-production.up.railway.app` — the dashboard (a separate deployable, §2),
+linked from the two login buttons in `index.html` (nav + hero). Only those two links point
+there; the 16 `canonical`/`og:url`/`og:image`/`twitter:image` URLs below are a separate set
+and stay pointed at the site's own host exclusively — unaffected by this.
 
 A domain move is **not** done when the site loads at the new address; it is done when all
 sixteen URLs are updated. This has already bitten once: the old host 404s, and half the site
@@ -325,10 +415,17 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   Escape closes and returns focus to the button; Tab from the button enters the menu; a link
   click closes it *and* navigates; outside tap closes; crossing 768px closes it; the closed
   nav exposes **2** links to the a11y tree and the open one **8**.
-- **Structure**: 7 bento cards in 4 rows; 6 command groups / 33 rows each with a permission
-  pill; every `.cmd__name` computes `direction: ltr` and starts with `/`; 3 guarantee panels.
+- **Structure**: 9 bento cards in 5 rows; 9 command groups / 45 rows each with a permission
+  pill; every `.cmd__name` computes `direction: ltr` and starts with `/`, **except**
+  `/اختصار`, which is genuinely Arabic and computes `direction: rtl` by design (§6); 3
+  guarantee panels.
 
-Current totals: **128 assertions + 17 menu assertions, all passing.**
+Prior totals were **128 assertions + 17 menu assertions, all passing** — measured before the
+`/tickets` system, `/musaed`, the `/about` permission/grouping change, the shortcuts system
+(`/اختصار`), and the `/tickets` type-management subcommands were added to the site
+(2026-08-05). The counts above (9 cards, 45 rows) are grep-verified; the full
+browser-measured assertion count has not been rerun since, so treat 128/17 as stale until the
+suite is recreated and rerun.
 
 Use `page.accessibility.snapshot({ root })` for accessible names — `innerText` returns `""`
 for `visibility: hidden` elements and will produce false "unnamed control" failures. Root the

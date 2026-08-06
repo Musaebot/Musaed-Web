@@ -22,9 +22,9 @@ separate origin** (see §2) — same category of link as the Discord bot-invite 
 auth scaffolded in this repo.
 
 ```text
-index.html                 landing page + its inline icon sprite (22 symbols)
+index.html                 landing page + its inline icon sprite (21 symbols)
 404.html                   custom error page, served by Caddy - see §9
-updates.html               changelog + its own sprite (1 symbol)
+updates.html               changelog + its own sprite (1 symbol) - unlinked, see below
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
 assets/css/styles.css      tokens, reset, shared components
@@ -38,6 +38,15 @@ assets/Pics/               brand marks. Capital P — Linux hosts are case-sensi
 Four pages, three stylesheets, one script. **Zero dependencies, zero build step.** There was
 a fifth page (`developer.html`); it was removed along with its CSS and JS. Do not resurrect
 it.
+
+**`updates.html` is unlinked, not removed.** As of 2026-08-06 the nav link (`التحديثات`)
+and its footer counterpart in the `النظام` column were both deleted from `index.html`, along
+with the now-orphaned `#i-sparkle` sprite symbol they used (22 → 21 symbols). The page file,
+`assets/css/updates.css`, its own sprite, and its content are all untouched and still deploy
+normally — it is simply unreachable from site navigation, only by someone who already has
+the direct `/updates.html` URL. If it ever gets relinked, restore both the nav `<a>` and the
+footer `<li>` (§6's nav-link and footer-a11y counts below assume it stays absent) and re-add
+`#i-sparkle` to the sprite.
 
 **`privacy.html` and `terms.html` load no JavaScript at all** — no `<script>`, no
 `class="no-js"`. A legal document must be readable with scripting off and by a crawler that
@@ -313,15 +322,14 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   the menu button, or the CTA overflows there before anywhere else. This is why
   `.nav__login` (the icon-only login link beside the CTA) is hidden below 768px
   instead of squeezed in here — there is no slack left to give it.
-- **768px** is where the **6** nav links first share one line with the brand and CTA.
-  Measured slack: **69.8px**. A seventh link costs roughly 75px, so it would not fit —
-  re-measure before adding one, and prefer a footer-only link.
-
-  **This figure is now stale for what actually renders here.** `.nav__login` was added
-  beside the CTA at this exact breakpoint (44px + the 18px `nav__inner` gap ≈ 62px) on an
-  estimate that it fits under the measured 69.8px, not on a re-measurement — no headless
-  browser was available when it was added. Re-measure the real slack at 768px before
-  trusting either number, and before adding anything else here.
+- **768px** is where the nav links first share one line with the brand and CTA. There are
+  **5** now, not 6 — `التحديثات`/`updates.html` was removed from `.nav__links` (see §1). The
+  last actual measurement (**69.8px** slack) was taken against the old 6-link version and is
+  now doubly stale: `.nav__login` was added beside the CTA after that measurement (an
+  estimate, never re-verified — 44px + the 18px `nav__inner` gap ≈ 62px), and now a link has
+  been removed on top of that, which can only have freed more room, not less. Don't quote
+  69.8px as current. Re-measure the real slack at 768px before trusting any number here, and
+  before adding anything back.
 
 ---
 
@@ -417,11 +425,12 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   overflow (`scrollWidth <= clientWidth`); no interactive element under 24×24; no unnamed
   link or button; no console or network errors. **Apply the WCAG 2.5.8 inline exemption** —
   a link inside a sentence is size-constrained by line-height and is not a failure.
-- **Nav**: 6 links on one line at ≥768px, each ≥44×44, and report the slack.
+- **Nav**: 5 links on one line at ≥768px, each ≥44×44, and report the slack.
 - **Menu behaviour** (375px): starts closed; click opens; panel sits flush under the bar;
   Escape closes and returns focus to the button; Tab from the button enters the menu; a link
   click closes it *and* navigates; outside tap closes; crossing 768px closes it; the closed
-  nav exposes **2** links to the a11y tree and the open one **8**.
+  nav exposes **2** links to the a11y tree and the open one **7** (both figures unverified —
+  written from the current markup, not a rerun; §6 explains why).
 - **Structure**: 9 bento cards in 5 rows; 9 command groups / 45 rows each with a permission
   pill; every `.cmd__name` computes `direction: ltr` and starts with `/`, **except**
   `/اختصار`, which is genuinely Arabic and computes `direction: rtl` by design (§6); 3
@@ -430,9 +439,9 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
 Prior totals were **128 assertions + 17 menu assertions, all passing** — measured before the
 `/tickets` system, `/musaed`, the `/about` permission/grouping change, the shortcuts system
 (`/اختصار`), and the `/tickets` type-management subcommands were added to the site
-(2026-08-05). The counts above (9 cards, 45 rows) are grep-verified; the full
-browser-measured assertion count has not been rerun since, so treat 128/17 as stale until the
-suite is recreated and rerun.
+(2026-08-05), and before `updates.html` was unlinked from nav/footer (2026-08-06). The counts
+above (9 cards, 45 rows) are grep-verified; the full browser-measured assertion count has not
+been rerun since, so treat 128/17 as stale until the suite is recreated and rerun.
 
 Use `page.accessibility.snapshot({ root })` for accessible names — `innerText` returns `""`
 for `visibility: hidden` elements and will produce false "unnamed control" failures. Root the

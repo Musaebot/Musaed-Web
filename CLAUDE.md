@@ -15,12 +15,15 @@ A **static public marketing site** for **مساعد (Musaed)**, an Arabic (Saudi
 moderation/automod Discord bot. Four pages. It explains the bot to server owners before they
 add it.
 
-It is **not** a dashboard. There is no login, no account, no logged-in state, and nothing on
-it manages anything. A dashboard is the next goal, but it is a **separate application** —
-see §2 before you act on that.
+It is **not** a dashboard, and nothing on it manages anything or shows real guild data —
+this repo itself has no login state, no account, no backend. The two login buttons (nav +
+hero) are outbound links to the dashboard's own OAuth2 flow, a **separate application on a
+separate origin** (see §2) — same category of link as the Discord bot-invite buttons, not
+auth scaffolded in this repo.
 
 ```text
 index.html                 landing page + its inline icon sprite (22 symbols)
+404.html                   custom error page, served by Caddy - see §9
 updates.html               changelog + its own sprite (1 symbol)
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
@@ -46,10 +49,14 @@ consistency": the scroll reveals would fade a privacy policy in.
 
 ## 2. Where this is going — the dashboard
 
-**The goal is a web dashboard**: a server owner signs in with Discord, picks one of their
-servers, and configures Musaed from the browser instead of typing slash commands. Every
-setting reachable through `/automod`, `/welcome`, `/agegate` and `/captcha` should be
-reachable through a form.
+**The dashboard exists and is deployed**: a server owner signs in with Discord, picks one
+of their servers, and configures Musaed from the browser instead of typing slash commands.
+It lives in its own repo (`musaed-dashboard`, private) and its own Railway service, at
+`musaed-dashboard-production.up.railway.app` — linked from this site's two login buttons,
+nowhere else. Every setting reachable through `/agegate`, `/captcha`, `/tickets` and
+`/اختصار` is reachable through a form there today; `/automod` and `/welcome` aren't yet
+(they predate the bot's settings-registry pattern — a bot-side change, not a dashboard one).
+This section's rules are still the ones that govern extending it, not just history.
 
 **Read this before you read §3, because it looks like a contradiction and is not.**
 
@@ -455,6 +462,15 @@ link from a footer link with the same label.
 - **The user edits files live in the IDE while you work.** A fragment that looks broken may
   be a half-typed sentence. Check `git diff` before deleting anything you did not write.
 - **Git reports CRLF warnings on every write.** Harmless; not a failure.
+- **`404.html` only works through Railway's real Caddy server, not a local static server.**
+  `python -m http.server` (the tool this file's own §8 tells you to test with) has no concept
+  of a custom error page and will show its own plain 404 for a missing path — that is not a
+  regression, it just isn't testing the mechanism that matters. The actual wiring is Railpack's
+  staticfile provider's *default* Caddyfile (nothing in this repo — confirmed from
+  `github.com/railwayapp/railpack`'s own template, not guessed): `handle_errors { rewrite *
+  /{err.status_code}.html }`. That single line is why a file named exactly `404.html` at the
+  root is the entire fix — no Caddyfile override needed, and the only way to actually verify
+  it is against the live Railway URL.
 
 ---
 

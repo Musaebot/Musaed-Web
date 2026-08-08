@@ -255,7 +255,9 @@ server-configurable defaults, not promises. Do not add figures there.
 - **Discord blurple is scoped to `.btn--primary` only** — buttons whose destination is
   Discord. Spread it further and it stops reading as "this goes to Discord" and starts
   reading as a second brand colour. Everything else is green: **36 `var(--accent)` usages**
-  (17 in `styles.css`, 12 in `updates.css`, 7 in `legal.css`).
+  (16 in `styles.css`, 12 in `updates.css`, 8 in `legal.css`). Measured, not counted by
+  hand — `grep -c 'var(--accent)' assets/css/*.css`. Note `var(--accent-soft)` does not
+  match that pattern and is not part of the count.
 - The Discord mark renders in **5 places**, all on `index.html`. White via
   `filter: brightness(0) invert(1)` on blurple; natural colour on dark panels.
 - **New sprite icons must come from the compiled Phosphor source, never hand-drawn and

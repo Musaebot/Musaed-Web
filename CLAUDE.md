@@ -61,11 +61,13 @@ consistency": the scroll reveals would fade a privacy policy in.
 **The dashboard exists and is deployed**: a server owner signs in with Discord, picks one
 of their servers, and configures Musaed from the browser instead of typing slash commands.
 It lives in its own repo (`musaed-dashboard`, private) and its own Railway service, at
-`musaed-dashboard-production.up.railway.app` — linked from this site's two login buttons,
-nowhere else. Every setting reachable through `/agegate`, `/captcha`, `/tickets` and
-`/اختصار` is reachable through a form there today; `/automod` and `/welcome` aren't yet
-(they predate the bot's settings-registry pattern — a bot-side change, not a dashboard one).
-This section's rules are still the ones that govern extending it, not just history.
+**`dashboard.musaed.dev`** — linked from this site's two login buttons, nowhere else. Every
+setting reachable through `/agegate`, `/captcha`, `/tickets`, `/اختصار`, `/welcome` and
+`/automod` is reachable through a form there today — all six of the bot's registered
+features. `/welcome` and `/automod` were the two holdouts and no longer are; the dashboard's
+pages are generated from the bot's settings registry rather than written per feature, so a
+newly registered feature appears there without dashboard work. This section's rules are still
+the ones that govern extending it, not just history.
 
 **Read this before you read §3, because it looks like a contradiction and is not.**
 
@@ -378,9 +380,16 @@ a real endpoint is a one-constant change. The declaration is space-aligned, so
 
 ### The hardcoded domain
 
-`https://musaed.up.railway.app` — **16 absolute URLs, 4 per page across 4 pages**:
-`canonical`, `og:url`, `og:image`, `twitter:image`. Crawlers reject relative URLs, so it is
-written literally.
+`https://musaed.dev` — **16 absolute URLs, 4 per page across 4 pages**: `canonical`, `og:url`,
+`og:image`, `twitter:image`. Crawlers reject relative URLs, so it is written literally.
+(`404.html` carries none of the four and is not part of the sixteen — an error page has no
+canonical address.)
+
+**These moved off `musaed.up.railway.app` on 2026-08-08.** That host still serves the site and
+always did, so nothing was broken — which is exactly why it went unnoticed: two live hosts
+serving identical content, with `canonical` pointing every crawler and social card at the
+unbranded one, so `musaed.dev` was published as the duplicate of its own Railway URL. A
+domain move that leaves the site *working* at both names is the easy one to leave half-done.
 
 ```bash
 grep -ohE 'https://[a-z0-9.-]+' *.html | sort -u
@@ -389,14 +398,24 @@ grep -ohE 'https://[a-z0-9.-]+' *.html | sort -u
 That must print exactly four hosts: the site's, `discord.gg` for the community invite
 (`https://discord.gg/QvNXvDDFtz` — **live, not a placeholder**), `discord.com` for the
 bot-invite URL and the link to Discord's own terms, and
-`musaed-dashboard-production.up.railway.app` — the dashboard (a separate deployable, §2),
-linked from the two login buttons in `index.html` (nav + hero). Only those two links point
-there; the 16 `canonical`/`og:url`/`og:image`/`twitter:image` URLs below are a separate set
-and stay pointed at the site's own host exclusively — unaffected by this.
+`dashboard.musaed.dev` — the dashboard (a separate deployable, §2), linked from the two login
+buttons in `index.html` (nav + hero). Only those two links point there; the 16
+`canonical`/`og:url`/`og:image`/`twitter:image` URLs below are a separate set and stay pointed
+at the site's own host exclusively — unaffected by this.
+
+**The dashboard's host changed on 2026-08-08** (it was a generated `*.up.railway.app` name)
+and the old one was **deleted, not left redirecting** — so both login buttons pointed at a
+dead host until they were updated. That is the same failure this section warns about below,
+one host over: nothing in this repo breaks visibly when a *different* deployable moves, because
+the links still render fine and only fail on click. If the dashboard host ever moves again,
+these two `href`s are the whole surface — grep for the host, not for `auth/login`.
 
 A domain move is **not** done when the site loads at the new address; it is done when all
-sixteen URLs are updated. This has already bitten once: the old host 404s, and half the site
-still pointed at it, so social cards referenced a dead image.
+sixteen URLs are updated. This has now bitten twice, in both directions: once when an old host
+404'd and half the site still pointed at it, so social cards referenced a dead image — and
+again on 2026-08-08, when the old host kept working and nothing looked wrong at all. The first
+kind announces itself. The second does not, so grep the host after every move rather than
+trusting the site to tell you.
 
 ---
 

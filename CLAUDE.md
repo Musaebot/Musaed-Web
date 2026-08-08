@@ -354,9 +354,12 @@ grep -n  "STATS_ENDPOINT" assets/js/main.js   # must stay null
 **Every link on the site points somewhere real.** The footer's قانوني column was the last
 holdout and is now wired to `privacy.html`, `terms.html` and a live `mailto:`.
 
-Both legal documents are dated `2026/08/01`; the terms date arrived as `[التاريخ]` in the
-source and was filled in by the project owner. The only invented values left anywhere on the
-site are the three `#stats` numbers.
+Both legal documents are dated `2026/08/08` — the dashboard-aware rewrite of both pages,
+covering the dashboard's login (name/avatar/ID collected, guild list scoped to what you can
+manage, session expiry) and the shortcuts feature's user-authored text. Staged first in
+`txt.txt` (now gitignored — it is scratch, not the copy of record; delete it freely once its
+content is absorbed) before being split into `privacy.html` / `terms.html` by hand. The only
+invented values left anywhere on the site are the three `#stats` numbers.
 
 **The bot invite is live and appears three times** (nav, hero, about), each opening in a new
 tab with `rel="noopener noreferrer"`. There is no single source for the URL, so a change to

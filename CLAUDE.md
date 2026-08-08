@@ -380,9 +380,9 @@ a real endpoint is a one-constant change. The declaration is space-aligned, so
 
 ### The hardcoded domain
 
-`https://musaed.dev` — **16 absolute URLs, 4 per page across 4 pages**: `canonical`, `og:url`,
+`https://musaed.dev` — **20 absolute URLs, 4 per page across 5 pages**: `canonical`, `og:url`,
 `og:image`, `twitter:image`. Crawlers reject relative URLs, so it is written literally.
-(`404.html` carries none of the four and is not part of the sixteen — an error page has no
+(`404.html` carries none of the four and is not part of the twenty — an error page has no
 canonical address.)
 
 **These moved off `musaed.up.railway.app` on 2026-08-08.** That host still serves the site and
@@ -398,20 +398,31 @@ grep -ohE 'https://[a-z0-9.-]+' *.html | sort -u
 That must print exactly four hosts: the site's, `discord.gg` for the community invite
 (`https://discord.gg/QvNXvDDFtz` — **live, not a placeholder**), `discord.com` for the
 bot-invite URL and the link to Discord's own terms, and
-`dashboard.musaed.dev` — the dashboard (a separate deployable, §2), linked from the two login
-buttons in `index.html` (nav + hero). Only those two links point there; the 16
-`canonical`/`og:url`/`og:image`/`twitter:image` URLs below are a separate set and stay pointed
-at the site's own host exclusively — unaffected by this.
+`dashboard.musaed.dev` — the dashboard (a separate deployable, §2).
+
+**The dashboard host is now referenced exactly once, in `connect.html`.** The two login
+buttons in `index.html` (nav + hero) used to point at it directly; they now point at
+`connect.html`, the pre-auth disclosure screen, whose "فهمت، كمّل" button is the single
+outbound link. So the grep surface for a dashboard host move is one line, not two — but the
+*entry points* to check when reasoning about the login path are still those two buttons plus
+the page between them. The 20 `canonical`/`og:url`/`og:image`/`twitter:image` URLs below are
+a separate set and stay pointed at the site's own host exclusively — unaffected by this.
+
+`connect.html` is a **content page, not auth** — no session, no OAuth, no protected state, so
+§3.4 is intact. The dashboard serves its own copy of the same disclosure at `/auth/connect`,
+because `/auth/login` is a public URL that a bookmark or a stale third-party link reaches
+without passing through this site. **The two wordings must stay in sync**; the other one is
+`app/templates/connect.html` in the Musaed-Dashboard repo.
 
 **The dashboard's host changed on 2026-08-08** (it was a generated `*.up.railway.app` name)
 and the old one was **deleted, not left redirecting** — so both login buttons pointed at a
 dead host until they were updated. That is the same failure this section warns about below,
 one host over: nothing in this repo breaks visibly when a *different* deployable moves, because
 the links still render fine and only fail on click. If the dashboard host ever moves again,
-these two `href`s are the whole surface — grep for the host, not for `auth/login`.
+grep for the host, not for `auth/login` — the `href` carrying it now lives in `connect.html`.
 
 A domain move is **not** done when the site loads at the new address; it is done when all
-sixteen URLs are updated. This has now bitten twice, in both directions: once when an old host
+twenty URLs are updated. This has now bitten twice, in both directions: once when an old host
 404'd and half the site still pointed at it, so social cards referenced a dead image — and
 again on 2026-08-08, when the old host kept working and nothing looked wrong at all. The first
 kind announces itself. The second does not, so grep the host after every move rather than

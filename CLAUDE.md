@@ -12,7 +12,7 @@ names, no server IDs. That rule applies to everything you write into this repo.
 ## 1. What this is
 
 A **static public marketing site** for **مساعد (Musaed)**, an Arabic (Saudi dialect)
-moderation/automod Discord bot. Four pages. It explains the bot to server owners before they
+moderation/automod Discord bot. Five pages. It explains the bot to server owners before they
 add it.
 
 It is **not** a dashboard, and nothing on it manages anything or shows real guild data —
@@ -25,19 +25,28 @@ auth scaffolded in this repo.
 index.html                 landing page + its inline icon sprite (21 symbols)
 404.html                   custom error page, served by Caddy - see §9
 updates.html               changelog + its own sprite (1 symbol) - unlinked, see below
+connect.html               pre-auth disclosure screen before the dashboard login - see §7
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
+google82b70d7af988f7a9.html  Google Search Console site-verification file - see below
 assets/css/styles.css      tokens, reset, shared components
 assets/css/updates.css     updates page only, loaded after styles.css
-assets/css/legal.css       BOTH legal pages, loaded after styles.css
+assets/css/legal.css       connect.html + BOTH legal pages, loaded after styles.css
 assets/js/main.js          stats data, count-up, scroll reveals, nav, link guard
 assets/fonts/              self-hosted woff2 (IBM Plex Sans Arabic + Plex Mono)
 assets/Pics/               brand marks. Capital P — Linux hosts are case-sensitive
 ```
 
-Four pages, three stylesheets, one script. **Zero dependencies, zero build step.** There was
-a fifth page (`developer.html`); it was removed along with its CSS and JS. Do not resurrect
+Five pages, three stylesheets, one script. **Zero dependencies, zero build step.** There was
+a sixth page (`developer.html`); it was removed along with its CSS and JS. Do not resurrect
 it.
+
+**`google82b70d7af988f7a9.html` is not a page.** It is the file Google Search Console issues
+for the HTML-file verification method: single line of plain text, no doctype, no `<html>`.
+It has to be reachable at exactly `https://musaed.dev/google82b70d7af988f7a9.html` — root of
+the domain, filename unchanged — for Google to accept the verification, so it deploys as-is
+alongside the real pages. Nothing links to it and nothing should; it is not part of site
+navigation, the same way `404.html` isn't.
 
 **`updates.html` is unlinked, not removed.** As of 2026-08-06 the nav link (`التحديثات`)
 and its footer counterpart in the `النظام` column were both deleted from `index.html`, along

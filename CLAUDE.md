@@ -376,12 +376,18 @@ invented values left anywhere on the site are the three `#stats` numbers.
 tab with `rel="noopener noreferrer"`. There is no single source for the URL, so a change to
 one is a change to all three. Its `permissions` integer is what Discord pre-ticks on the
 authorize screen — editing it changes what the bot is granted on join, so do not "tidy" it.
-It requests 23 permissions and, correctly, **not** Administrator: a moderation bot that asks
-for Administrator is asking a server to stop reasoning about what it can do. That is least
-privilege, which is a different claim from the one `#trust` makes on the page
-("صلاحياتك هي القرار" — the bot checks *the user's* permissions before acting). Both matter;
-do not conflate them. Ampersands are `&amp;` because it is an HTML attribute; the browser
-sends plain `&`.
+
+**It requests `permissions=8` — Administrator, and nothing else — as of 2026-08-10.** This
+is a deliberate reversal of the previous design: the invite used to request an explicit
+23-permission set specifically to avoid Administrator, on the reasoning that a moderation bot
+asking for Administrator is asking a server to stop reasoning about what it can do. The
+project owner chose to switch to Administrator anyway; if you're asked to "clean up" the
+permissions integer or restore least-privilege, confirm with the owner first — this was a
+conscious tradeoff, not drift. `#trust`'s claim ("صلاحياتك هي القرار" — the bot checks *the
+user's* permissions before acting, not what the bot's own OAuth grant allows) is unaffected
+by this and still holds: it's about per-command authorization checks against the invoking
+member, orthogonal to what scope the bot's own application token carries. Ampersands are
+`&amp;` because it is an HTML attribute; the browser sends plain `&`.
 
 **`updates.html` has zero `data-mock`** — its single release (`1.0.0`, `أغسطس 2026`, `البداية`)
 is real, owner-supplied. Its two header figures are kept in step by hand: `إصدارات` counts

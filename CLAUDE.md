@@ -29,6 +29,8 @@ connect.html               pre-auth disclosure screen before the dashboard login
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
 google82b70d7af988f7a9.html  Google Search Console site-verification file - see below
+sitemap.xml                lists the 4 real pages (not connect.html, not 404.html) - see §7
+robots.txt                 Allow: / for everyone, points at sitemap.xml - see §7
 assets/css/styles.css      tokens, reset, shared components
 assets/css/updates.css     updates page only, loaded after styles.css
 assets/css/legal.css       connect.html + BOTH legal pages, loaded after styles.css
@@ -441,6 +443,26 @@ twenty URLs are updated. This has now bitten twice, in both directions: once whe
 again on 2026-08-08, when the old host kept working and nothing looked wrong at all. The first
 kind announces itself. The second does not, so grep the host after every move rather than
 trusting the site to tell you.
+
+### sitemap.xml and robots.txt
+
+`sitemap.xml` lists exactly the four real, indexable pages — `/`, `/privacy.html`,
+`/terms.html`, `/updates.html` — each with a `<lastmod>` taken from that file's last commit
+date, not invented. **Deliberately excludes two pages that otherwise look like they belong:**
+`connect.html` (a functional pre-auth step, not content someone should land on from a search
+result) and `404.html` (an error page has no canonical address — same reasoning as the
+`canonical`/`og:url` exclusion above). `updates.html` **is** included even though it's
+unlinked from nav/footer (§1) — unlinked from navigation and hidden from search are different
+claims, and the page is still live and real.
+
+`robots.txt` allows everything and points at the sitemap. Both files hold absolute
+`musaed.dev` URLs but are **not** `.html`, so they are invisible to the `grep -ohE
+'https://[a-z0-9.-]+' *.html` check above — a future domain move has to update these two
+files by hand as well, or the sitemap will keep advertising the old host to crawlers after
+every page's own `canonical` has already moved on.
+
+`dashboard.musaed.dev` gets no robots.txt of its own from this repo — that app is a separate
+deployable (§2) and staying unindexed is tracked as a separate, smaller task there, not here.
 
 ---
 

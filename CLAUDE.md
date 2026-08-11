@@ -609,6 +609,21 @@ link from a footer link with the same label.
   /{err.status_code}.html }`. That single line is why a file named exactly `404.html` at the
   root is the entire fix — no Caddyfile override needed, and the only way to actually verify
   it is against the live Railway URL.
+- **`musaed.dev` sits behind Cloudflare, and Cloudflare edge-caches CSS/JS but not HTML —
+  confirmed 2026-08-11 via response headers, not guessed.** `index.html` always comes back
+  `cf-cache-status: DYNAMIC` (fresh every request); `assets/css/styles.css` and
+  `assets/js/main.js` come back `cf-cache-status: HIT` with `Cache-Control: max-age=14400` (4
+  hours), and a Railway redeploy does **not** purge that cache. Caught in the wild: a CSS-only
+  change (new `.dashfeatures`/`.cmdgroup__note` rules) deployed successfully to Railway —
+  confirmed via `musaed.up.railway.app`'s `Last-Modified` header matching the deploy — while
+  `musaed.dev` kept serving CSS from over a day earlier, so the same page rendered with full
+  styling on one host and as a plain unstyled list on the other. **If you change CSS or JS and
+  need to verify it's actually live, check `musaed.up.railway.app` (no CDN in front) — not
+  `musaed.dev`, which can lag up to 4 hours.** There is no fix available from this repo: the
+  cache has to be purged from Cloudflare's dashboard (Caching → Configuration → Purge Cache),
+  which is outside anything a git push or Railway action can reach. HTML-only changes (like
+  the `#stats` `hidden` attribute, §1) are unaffected by this, which is why that change worked
+  immediately and this one didn't.
 
 ---
 
@@ -631,6 +646,18 @@ After a push, verify against the **remote**, not just locally:
 ```bash
 git ls-remote origin refs/heads/main    # must equal git rev-parse HEAD
 ```
+
+**Then verify the live deploy against `musaed.up.railway.app`, not `musaed.dev`, if the
+change touched CSS or JS** — §9 explains why: Cloudflare caches those for up to 4 hours on
+the branded domain and a redeploy doesn't purge it, so `musaed.dev` can look unchanged (or
+half-changed) right after a push that fully succeeded. `musaed.dev` is still fine to check for
+HTML-only changes.
+
+Also confirm the push actually triggered a Railway deploy — it doesn't always. `list-deployments`
+should show a fresh entry with `reason: "deploy"` and the new commit hash within a few
+minutes. If it doesn't, `redeploy` will **not** fix it (it re-runs the last known build, not
+the latest commit — confirmed 2026-08-11); push an empty commit (`git commit --allow-empty`)
+to re-trigger the GitHub App event instead.
 
 ---
 

@@ -59,6 +59,19 @@ the direct `/updates.html` URL. If it ever gets relinked, restore both the nav `
 footer `<li>` (§6's nav-link and footer-a11y counts below assume it stays absent) and re-add
 `#i-sparkle` to the sprite.
 
+**`#stats` (`مساعد بالأرقام`) is hidden, not removed — same pattern as `updates.html`, one
+level deeper.** As of 2026-08-10 the section carries a `hidden` attribute, and its nav link
+(`الأرقام`) and footer counterpart in the `الموقع` column were both deleted from
+`index.html`. Unlike `updates.html` this isn't a separate page — `#stats` lives inline on
+`index.html` itself — so unlinking the nav anchor alone would not have stopped it from
+rendering as you scroll; the `hidden` attribute is what actually does that. The markup, its
+three `data-mock` stats, and `main.js`'s `initStats()` are all untouched: the count-up code
+still runs against the hidden nodes (harmless — an `IntersectionObserver` on a `display:none`
+subtree just never fires), and `#i-users` stays referenced from inside the section itself, so
+removing the footer row did not orphan that sprite symbol the way removing `التحديثات` did
+for `#i-sparkle`. If this ever gets shown again, remove `hidden` and restore both the nav
+`<a>` and the footer `<li>`.
+
 **`privacy.html` and `terms.html` load no JavaScript at all** — no `<script>`, no
 `class="no-js"`. A legal document must be readable with scripting off and by a crawler that
 does not run it, and both URLs go in Discord's Developer Portal (Privacy Policy URL / Terms
@@ -338,13 +351,14 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   `.nav__login` (the icon-only login link beside the CTA) is hidden below 768px
   instead of squeezed in here — there is no slack left to give it.
 - **768px** is where the nav links first share one line with the brand and CTA. There are
-  **5** now, not 6 — `التحديثات`/`updates.html` was removed from `.nav__links` (see §1). The
-  last actual measurement (**69.8px** slack) was taken against the old 6-link version and is
-  now doubly stale: `.nav__login` was added beside the CTA after that measurement (an
-  estimate, never re-verified — 44px + the 18px `nav__inner` gap ≈ 62px), and now a link has
-  been removed on top of that, which can only have freed more room, not less. Don't quote
-  69.8px as current. Re-measure the real slack at 768px before trusting any number here, and
-  before adding anything back.
+  **4** now, not 6 — `التحديثات`/`updates.html` (2026-08-06) and `الأرقام`/`#stats`
+  (2026-08-10) were both removed from `.nav__links` (see §1). The last actual measurement
+  (**69.8px** slack) was taken against the old 6-link version and is now triply stale:
+  `.nav__login` was added beside the CTA after that measurement (an estimate, never
+  re-verified — 44px + the 18px `nav__inner` gap ≈ 62px), and two links have been removed on
+  top of that since, which can only have freed more room, not less. Don't quote 69.8px as
+  current. Re-measure the real slack at 768px before trusting any number here, and before
+  adding anything back.
 
 ---
 
@@ -497,11 +511,11 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   overflow (`scrollWidth <= clientWidth`); no interactive element under 24×24; no unnamed
   link or button; no console or network errors. **Apply the WCAG 2.5.8 inline exemption** —
   a link inside a sentence is size-constrained by line-height and is not a failure.
-- **Nav**: 5 links on one line at ≥768px, each ≥44×44, and report the slack.
+- **Nav**: 4 links on one line at ≥768px, each ≥44×44, and report the slack.
 - **Menu behaviour** (375px): starts closed; click opens; panel sits flush under the bar;
   Escape closes and returns focus to the button; Tab from the button enters the menu; a link
   click closes it *and* navigates; outside tap closes; crossing 768px closes it; the closed
-  nav exposes **2** links to the a11y tree and the open one **7** (both figures unverified —
+  nav exposes **2** links to the a11y tree and the open one **6** (both figures unverified —
   written from the current markup, not a rerun; §6 explains why).
 - **Structure**: 9 bento cards in 5 rows; 9 command groups / 45 rows each with a permission
   pill; every `.cmd__name` computes `direction: ltr` and starts with `/`, **except**

@@ -184,18 +184,51 @@ command the bot does not answer to is worse than one listing nothing.
 Two places go stale when the bot's command surface changes, and only these two:
 
 1. the `.chip` lists in `#features`
-2. `#commands` — the full reference: **9 groups, 45 subcommand rows**
+2. `#commands` — the full reference: **7 groups, 16 subcommand rows** (down from 9/45 as of
+   2026-08-11 — see below)
 
 Both are plain HTML in `index.html`. No generator; sync by hand.
+
+**`#commands` is deliberately no longer a full reference — as of 2026-08-11 it is a curated
+subset plus dashboard pointers.** The project owner supplied an exact allow-list of 16 real
+commands (`/about`, `/ban`, `/captcha lockdown`, `/captcha unlock`, `/kick`, `/modlogs`,
+`/musaed`, `/prefix reset`, `/prefix set`, `/prefix show`, `/serverinfo`, `/tickets panel`,
+`/tickets setup`, `/timeout`, `/warn`, `/welcome preview`) and every other subcommand
+previously listed was removed — not because the underlying bot features stopped existing, but
+because most per-feature configuration moved to the dashboard (§2) and the page no longer
+tries to enumerate every slash subcommand that still technically exists. **This inverts the
+historical rule below it in this section**: `#commands` used to be a complete, generated-by-
+hand mirror of the bot's registered command tree (hence "the full reference"); it is now a
+short list of commands still worth calling out directly, plus short notes pointing everything
+else at the dashboard. If you're asked to "sync `#commands` with the bot" in the old sense —
+listing every registered subcommand — confirm with the owner first; the 2026-08-11 change was
+a deliberate scope-narrowing, not the site falling behind. The three "moved to dashboard"
+groups (`الترحيب`, `التحقق بالكابتشا`, `تذاكر الدعم`) each end with an identical one-line
+`.cmdgroup__note`: **"باقي الإعدادات من dashboard.musaed.dev."** — same wording every time, no
+restated feature detail. Two groups (`الحماية التلقائية`, `بوابة عمر الحساب`) lost every
+subcommand and were removed as standalone groups entirely; they now live in one line each
+inside a new small section right after `#commands`, `#dashboard-features`
+(`ميزات تُدار من الداشبورد`), which carries a single shared dashboard link for both rather
+than one per item. `اختصارات نصية` (shortcuts, `/اختصار`) was removed from `#commands`
+outright with no dashboard note at all — it simply is not in the owner's 16-command allow-list
+and was not one of the five sections named for the "rest is on the dashboard" treatment. Don't
+assume that means the feature is gone from the bot; it means this page stopped listing it and
+no reason was given. Verify against the bot's actual command tree (the advice further down
+this section) before writing anything more specific than that.
 
 **This has already gone wrong.** The page originally advertised prefix commands
 (`!طرد`, `!حظر`, `!اسكات`, `!تحذير`), a per-server prefix feature, and a rate-limit card with
 an invented `!تهدئة` command. The bot registered **slash commands only** at the time — none
 of that existed. It is all gone.
 
-**`/prefix` is deliberately not listed.** The command group exists and writes a prefix, but
-no prefix commands are registered, so setting one has no user-visible effect. Listing it
-would advertise a no-op.
+**`/prefix` used to be deliberately excluded, and no longer is — this is a reversal, not
+drift.** The original reasoning: the command group existed and wrote a prefix, but no
+prefix-based text commands were registered, so setting one had no user-visible effect, and
+listing it would have advertised a no-op. As of 2026-08-11 the project owner explicitly added
+`/prefix set`, `/prefix show`, `/prefix reset` to `#commands`'s allow-list (its own group,
+`بادئة الأوامر`, icon `i-terminal`, pill `إدارة السيرفر`) regardless of that old reasoning. If
+you're asked to "clean up" and remove `/prefix` again citing the no-op argument, confirm with
+the owner first — the same way the Administrator-permission reversal below asks you to.
 
 **In-chat moderation triggers exist but are deliberately not enumerated.** The bot now
 recognizes a few plain Arabic words typed directly in chat as shortcuts for ban/timeout/
@@ -207,41 +240,31 @@ purpose: naming them here would be this site publishing exactly what the bot's o
 keeps unlisted. **Never add a `#commands` row for these** — they are not slash commands, and
 `#commands`'s own lede claims everything listed there is one.
 
-**Shortcuts are a separate feature from the in-chat triggers above, and are listed.**
-`/اختصار` (Administrator) is a real registered slash command that lets a server admin
-define their *own* trigger word — any word they pick, stored per guild — that maps to
-ban, kick, or timeout. It is a fourth feature in the bot's settings layer, a peer of
-agegate/captcha/tickets, not a sub-feature of moderation, so it gets the same treatment
-those three got: its own bento card (`اختصارات نصية`, icon `i-lightning`) and its own
-`#commands` group. Publishing that it exists reveals nothing guild-specific — the word is
-the admin's own choice, not a fixed set the bot ships with — and an admin has to know
-`/اختصار` exists to configure it, so unlike the fixed triggers, hiding it would only make
-the feature unusable. Its pill reads **مدير السيرفر**, matching `بوابة عمر الحساب` — both
-are strictly Administrator-only, not the Administrator-or-Manage-Server tier `/about`
-uses, so they get the stricter wording, not `إدارة السيرفر`.
+**Shortcuts used to be listed as their own `#commands` group, and no longer are.**
+`/اختصار` (Administrator) is still a real registered slash command that lets a server admin
+define their own trigger word mapped to ban/kick/timeout — a peer of agegate/captcha/tickets
+in the bot's settings layer, not a sub-feature of moderation. It had its own group
+(`اختصارات نصية`, icon `i-lightning`, pill `مدير السيرفر`) until 2026-08-11, when it was
+removed from `#commands` along with everything else not on the owner's 16-command allow-list
+(see above). **Its bento card in `#features` was not touched** — that section wasn't in scope
+for the 2026-08-11 change — so the feature is still described there, just no longer given its
+own command-reference row. `/اختصار` was also the one command name on the page written in
+Arabic rather than Latin, styled with `.cmd__name--ar` (`text-align: start`, `--sans` instead
+of `--mono`) instead of the `dir="ltr"` isolation every Latin command name gets. With that row
+gone, **`.cmd__name--ar` in `styles.css` is now unused dead code** — every remaining
+`.cmd__name` on the page is Latin and gets plain `dir="ltr"`. Left in place rather than
+deleted, in case an Arabic-named command gets added back later; flag it for cleanup if one
+never does.
 
-**`/اختصار` is the one Arabic command name on the page**, so its `.cmd__name` carries no
-`dir="ltr"` — the surrounding rows use that attribute to isolate a *Latin* name from RTL
-reordering, and applying it to real Arabic text would reverse it, which is a different
-failure than the zigzag it prevents for Latin names. It gets `.cmd__name--ar` instead:
-`text-align: start` right-aligns it to the same edge as every other row (its direction is
-left at the ambient RTL, where `start` is the right edge — no `dir` override needed to get
-there), and the font swaps off `--mono` (no Arabic glyphs) the same way `.chip--ar` does
-for a chip. See §5 for the icon-sourcing rule this icon was fetched under.
-
-**`#commands` grew from 7 groups to 9 across two separate reasons — do not conflate them.**
-First, `/about` and `/serverinfo` stopped sharing one permission: `/about` became an
-admin-only command manual, auto-generated from the bot's live command tree (gated to
-Administrator-or-Manage-Server on the bot side); `/serverinfo` stayed public. One group can
-only carry one permission pill, so `/about` got its own single-command group
-(`دليل الأوامر`, icon `i-book`) instead of forcing a false shared pill onto `معلومات`
-(7 → 8). Its pill reads **إدارة السيرفر** — the same wording already used for
-automod/welcome/captcha/tickets, not new wording — because Discord's Administrator
-permission bypasses every lesser check anyway, so "Administrator or Manage Server" and plain
-"Manage Server" gate the exact same set of members in practice. `/musaed` (a public,
-DM-capable "what is this bot" command with an invite-link button) took `/about`'s old seat
-in `معلومات` next to `/serverinfo`. Second, unrelated to any of that, the shortcuts feature
-above shipped its own group (8 → 9).
+**`#commands` grew from 7 groups to 9, then back down to 7 — do not conflate the two
+episodes.** The 7→9 growth (historical, pre-2026-08-11): `/about` split off from `معلومات`
+into its own single-command group (`دليل الأوامر`, icon `i-book`, pill `إدارة السيرفر`) when
+it stopped sharing a permission with `/serverinfo`, and the shortcuts group above shipped
+separately — two unrelated reasons, same net effect (7 → 8 → 9). The 9→7 drop is the
+2026-08-11 rewrite described earlier in this section: automod and agegate lost their groups
+entirely (their commands moved to `#dashboard-features` instead), shortcuts was removed with
+no replacement, and a new `بادئة الأوامر` (`/prefix`) group was added — net 9 → 7, not a
+coincidence that it isn't 9 → 6; the prefix reversal happened in the same pass.
 
 **When the bot-side project guide gets pasted into a session, diff it against this site
 before touching anything else.** Three times now the bot's own `CLAUDE.md`/guide has been
@@ -262,6 +285,13 @@ account-age gate, captcha, support tickets, text shortcuts (admin-defined trigge
 ban/kick/timeout). Plus Arabic duration parsing, which is the most distinctive feature and
 is worth keeping prominent.
 
+**Being a "real system" and having a `#commands` presence are no longer the same claim.**
+Automod and account-age gate are both still real, both still count toward the seven above,
+and neither has a single row in `#commands` as of 2026-08-11 — they're dashboard-only from
+this page's point of view (see `#dashboard-features`, above). Don't use "it's not in
+`#commands`" as evidence a system stopped existing; check the dashboard-managed groups and
+`#dashboard-features` before concluding that.
+
 **`#trust` quotes no numbers** for retention windows or automod thresholds — those are
 server-configurable defaults, not promises. Do not add figures there.
 
@@ -278,10 +308,12 @@ server-configurable defaults, not promises. Do not add figures there.
   is for Latin/mono only. Arabic also needs a taller line-height than Latin.
 - **Discord blurple is scoped to `.btn--primary` only** — buttons whose destination is
   Discord. Spread it further and it stops reading as "this goes to Discord" and starts
-  reading as a second brand colour. Everything else is green: **36 `var(--accent)` usages**
-  (16 in `styles.css`, 12 in `updates.css`, 8 in `legal.css`). Measured, not counted by
+  reading as a second brand colour. Everything else is green: **40 `var(--accent)` usages**
+  (20 in `styles.css`, 12 in `updates.css`, 8 in `legal.css`). Measured, not counted by
   hand — `grep -c 'var(--accent)' assets/css/*.css`. Note `var(--accent-soft)` does not
-  match that pattern and is not part of the count.
+  match that pattern and is not part of the count. The `styles.css` count grew from 16 to 20
+  on 2026-08-11: two new link styles (`.cmdgroup__note a`, `.dashfeatures__note a`), each
+  using `var(--accent)` twice (`color`, `:hover` `border-color`).
 - The Discord mark renders in **5 places**, all on `index.html`. White via
   `filter: brightness(0) invert(1)` on blurple; natural colour on dark panels.
 - **New sprite icons must come from the compiled Phosphor source, never hand-drawn and
@@ -318,18 +350,18 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   the leading slash stays left — but `dir` also flips the block's own alignment, so
   `.cmd__name` sets `text-align: end`, which resolves against the element's *own* `ltr`
   direction and therefore means right. Together they put names on the page's reading edge
-  with characters running left to right. **55 `dir="ltr"` attributes: 44 command names + 11
-  Latin chips**, out of 45 total command rows. Drop either half and you get a zigzag, or a
-  slash on the wrong side.
-- **`/اختصار` is the one Arabic command name, and it must NOT get `dir="ltr"`.** That
-  attribute isolates *Latin* text from RTL reordering; applying it to real Arabic text
-  reverses it, which is a worse failure than the zigzag it prevents elsewhere. Use
-  `.cmd__name--ar` instead — `text-align: start`, which right-aligns it to the same edge
-  as every `dir="ltr"` row, because the element is left at its natural (inherited) RTL
-  direction, where `start` already means right. No `dir` override needed or wanted.
+  with characters running left to right. **27 `dir="ltr"` attributes: 16 command names + 11
+  Latin chips**, out of 16 total command rows — every remaining command name is Latin, so
+  the ratio is 1:1 as of 2026-08-11 (down from 44 names / 45 rows; §4 has the history). Drop
+  either half and you get a zigzag, or a slash on the wrong side.
+- **`.cmd__name--ar` is currently unused, not deleted.** It existed for `/اختصار`, the one
+  Arabic command name the page ever had — `text-align: start` (right-aligns without a `dir`
+  override, since the element is already RTL) plus dropping `--mono` (no Arabic glyphs, same
+  reason `.chip--ar` exists). That row was removed from `#commands` on 2026-08-11 (§4), so
+  nothing on the page uses this class right now. If a future Arabic-named command shows up,
+  reuse it rather than reinventing it; if none ever does, it's a safe deletion candidate.
 - **A chip containing Arabic needs `.chip--ar`.** Plex Mono has no Arabic glyphs, so `--mono`
-  falls back part-way through the string and opens a wide gap. `.cmd__name--ar` swaps off
-  `--mono` for the same reason.
+  falls back part-way through the string and opens a wide gap.
 - **`.reveal` grids must be added to `GROUPS` in `main.js`** or their children all land at
   once instead of sequencing. Currently:
   `.bento, .cmds, .stats, .guards, .team, .about`.
@@ -436,13 +468,20 @@ That must print exactly four hosts: the site's, `discord.gg` for the community i
 bot-invite URL and the link to Discord's own terms, and
 `dashboard.musaed.dev` — the dashboard (a separate deployable, §2).
 
-**The dashboard host is now referenced exactly once, in `connect.html`.** The two login
-buttons in `index.html` (nav + hero) used to point at it directly; they now point at
-`connect.html`, the pre-auth disclosure screen, whose "فهمت، كمّل" button is the single
-outbound link. So the grep surface for a dashboard host move is one line, not two — but the
-*entry points* to check when reasoning about the login path are still those two buttons plus
-the page between them. The 20 `canonical`/`og:url`/`og:image`/`twitter:image` URLs below are
-a separate set and stay pointed at the site's own host exclusively — unaffected by this.
+**The dashboard host appears 5 times as of 2026-08-11: once in `connect.html`, four times in
+`index.html`.** Until 2026-08-11 it was referenced exactly once, in `connect.html` — the two
+login buttons in `index.html` (nav + hero) point at `connect.html`, the pre-auth disclosure
+screen, whose "فهمت، كمّل" button is the single outbound link to the dashboard, and that was
+the *only* place the host string appeared. The `#commands` allow-list rewrite (§4) added four
+more, direct `<a href="https://dashboard.musaed.dev">` links: three identical
+`.cmdgroup__note` lines (`الترحيب`, `التحقق بالكابتشا`, `تذاكر الدعم`) and one in
+`#dashboard-features`. These are deliberately **not** routed through `connect.html` — they're
+informational "read more about this feature" pointers, not the prominent "log in" CTAs
+`connect.html` exists to intercept, and the dashboard has its own `/auth/connect` disclosure
+that fires before OAuth regardless of how someone arrives. If the dashboard host ever moves,
+grep will now surface 5 lines across 2 files, not 1 line in 1 file — update all of them. The
+20 `canonical`/`og:url`/`og:image`/`twitter:image` URLs below are a separate set and stay
+pointed at the site's own host exclusively — unaffected by this.
 
 `connect.html` is a **content page, not auth** — no session, no OAuth, no protected state, so
 §3.4 is intact. The dashboard serves its own copy of the same disclosure at `/auth/connect`,
@@ -517,17 +556,21 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   click closes it *and* navigates; outside tap closes; crossing 768px closes it; the closed
   nav exposes **2** links to the a11y tree and the open one **6** (both figures unverified —
   written from the current markup, not a rerun; §6 explains why).
-- **Structure**: 9 bento cards in 5 rows; 9 command groups / 45 rows each with a permission
-  pill; every `.cmd__name` computes `direction: ltr` and starts with `/`, **except**
-  `/اختصار`, which is genuinely Arabic and computes `direction: rtl` by design (§6); 3
+- **Structure**: 9 bento cards in 5 rows; 7 command groups / 16 rows, each group either
+  carrying a permission pill or a `.cmdgroup__note` (or both) — `الترحيب`, `التحقق بالكابتشا`,
+  `تذاكر الدعم` have both; every `.cmd__name` computes `direction: ltr` and starts with `/`,
+  with no exceptions as of 2026-08-11 (the one Arabic-named row, `/اختصار`, is gone — §4, §6);
+  1 `#dashboard-features` section with exactly 2 `<li>`s and exactly 1 outbound link; 3
   guarantee panels.
 
 Prior totals were **128 assertions + 17 menu assertions, all passing** — measured before the
 `/tickets` system, `/musaed`, the `/about` permission/grouping change, the shortcuts system
 (`/اختصار`), and the `/tickets` type-management subcommands were added to the site
-(2026-08-05), and before `updates.html` was unlinked from nav/footer (2026-08-06). The counts
-above (9 cards, 45 rows) are grep-verified; the full browser-measured assertion count has not
-been rerun since, so treat 128/17 as stale until the suite is recreated and rerun.
+(2026-08-05), before `updates.html` was unlinked from nav/footer (2026-08-06), and well before
+the `#commands` allow-list rewrite and `#dashboard-features` addition (2026-08-11, §4). The
+9-cards figure is still grep-verified and current; the 45-rows figure is not — it's 16 now.
+The full browser-measured assertion count has not been rerun since 2026-08-05, so treat 128/17
+as stale until the suite is recreated and rerun.
 
 Use `page.accessibility.snapshot({ root })` for accessible names — `innerText` returns `""`
 for `visibility: hidden` elements and will produce false "unnamed control" failures. Root the

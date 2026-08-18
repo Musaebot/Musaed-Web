@@ -22,7 +22,7 @@ separate origin** (see §2) — same category of link as the Discord bot-invite 
 auth scaffolded in this repo.
 
 ```text
-index.html                 landing page + its inline icon sprite (21 symbols)
+index.html                 landing page + its inline icon sprite (22 symbols)
 404.html                   custom error page, served by Caddy - see §9
 updates.html               changelog + its own sprite (1 symbol) - unlinked, see below
 connect.html               pre-auth disclosure screen before the dashboard login - see §7
@@ -52,7 +52,8 @@ navigation, the same way `404.html` isn't.
 
 **`updates.html` is unlinked, not removed.** As of 2026-08-06 the nav link (`التحديثات`)
 and its footer counterpart in the `النظام` column were both deleted from `index.html`, along
-with the now-orphaned `#i-sparkle` sprite symbol they used (22 → 21 symbols). The page file,
+with the now-orphaned `#i-sparkle` sprite symbol they used (22 → 21 symbols at the time; the
+sprite is back at 22 since `#i-chat-text` was added 2026-08-17, §4). The page file,
 `assets/css/updates.css`, its own sprite, and its content are all untouched and still deploy
 normally — it is simply unreachable from site navigation, only by someone who already has
 the direct `/updates.html` URL. If it ever gets relinked, restore both the nav `<a>` and the
@@ -208,8 +209,10 @@ groups (`الترحيب`, `التحقق بالكابتشا`, `تذاكر الد�
 restated feature detail. Two groups (`الحماية التلقائية`, `بوابة عمر الحساب`) lost every
 subcommand and were removed as standalone groups entirely; they now live in one line each
 inside a new small section right after `#commands`, `#dashboard-features`
-(`ميزات تُدار من الداشبورد`), which carries a single shared dashboard link for both rather
-than one per item. `اختصارات نصية` (shortcuts, `/اختصار`) was removed from `#commands`
+(`ميزات تُدار من الداشبورد`), which carries a single shared dashboard link for all of them
+rather than one per item. **It holds three `<li>`s, not two, as of 2026-08-17** —
+auto-responses was added alongside automod and agegate for the same reason (a real system
+with no slash commands); the single shared link did not change. `اختصارات نصية` (shortcuts, `/اختصار`) was removed from `#commands`
 outright with no dashboard note at all — it simply is not in the owner's 16-command allow-list
 and was not one of the five sections named for the "rest is on the dashboard" treatment. Don't
 assume that means the feature is gone from the bot; it means this page stopped listing it and
@@ -280,14 +283,28 @@ you're handed that guide, read §4, §7 (or wherever the
 bot repo lists its commands/permissions) and cross-check every group and row here before
 doing anything else asked of you.
 
-The seven real systems: moderation, automod (banned words + spam + raid detection), welcome,
+The eight real systems: moderation, automod (banned words + spam + raid detection), welcome,
 account-age gate, captcha, support tickets, text shortcuts (admin-defined trigger words for
-ban/kick/timeout). Plus Arabic duration parsing, which is the most distinctive feature and
-is worth keeping prominent.
+ban/kick/timeout), auto-responses (admin-defined trigger word → canned reply). Plus Arabic
+duration parsing, which is the most distinctive feature and is worth keeping prominent.
+
+**It was seven until 2026-08-17.** Auto-responses (`الردود التلقائية`) shipped on the bot
+side 2026-08-16 and the site had never mentioned it — found by diffing the bot/dashboard
+product inventory against this repo, which is exactly the check the paragraph below this
+section's history describes. It got a `#features` bento card (icon `i-chat-text`) and a
+`#dashboard-features` row, and both seven-counts on the site moved to eight: `#features`'s
+lede (`سبعة أنظمة` → `ثمانية أنظمة`) and `updates.html`'s `أنظمة` figure (7 → 8). It has no
+slash commands at all, so it gets **no `#commands` row** — same shape as automod and agegate.
+
+**A ninth system exists on the bot side and must stay off this site.** The honeypot trap
+channel (`قناة الفخ`) is gated to a single pilot guild and is not released; it is not one of
+the eight above. Do not add it to `#features`, `#dashboard-features`, or the counts, however
+complete the bot-side documentation looks — publishing an unreleased feature is worse than
+omitting a released one.
 
 **Being a "real system" and having a `#commands` presence are no longer the same claim.**
-Automod and account-age gate are both still real, both still count toward the seven above,
-and neither has a single row in `#commands` as of 2026-08-11 — they're dashboard-only from
+Automod, account-age gate and auto-responses are all still real, all still count toward the
+eight above, and none of them has a single row in `#commands` — they're dashboard-only from
 this page's point of view (see `#dashboard-features`, above). Don't use "it's not in
 `#commands`" as evidence a system stopped existing; check the dashboard-managed groups and
 `#dashboard-features` before concluding that.
@@ -384,13 +401,11 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   instead of squeezed in here — there is no slack left to give it.
 - **768px** is where the nav links first share one line with the brand and CTA. There are
   **4** now, not 6 — `التحديثات`/`updates.html` (2026-08-06) and `الأرقام`/`#stats`
-  (2026-08-10) were both removed from `.nav__links` (see §1). The last actual measurement
-  (**69.8px** slack) was taken against the old 6-link version and is now triply stale:
-  `.nav__login` was added beside the CTA after that measurement (an estimate, never
-  re-verified — 44px + the 18px `nav__inner` gap ≈ 62px), and two links have been removed on
-  top of that since, which can only have freed more room, not less. Don't quote 69.8px as
-  current. Re-measure the real slack at 768px before trusting any number here, and before
-  adding anything back.
+  (2026-08-10) were both removed from `.nav__links` (see §1). **Slack is 191.5px, measured
+  2026-08-17** in headless Chrome at exactly 768px, with every nav link clearing 44×44. That
+  supersedes the old **69.8px** figure, which had been taken against the 6-link version and
+  was stale in three directions at once. There is a lot of room now; the constraint on adding
+  a link back is 320px (above), not this breakpoint.
 
 ---
 
@@ -411,7 +426,10 @@ grep -n  "STATS_ENDPOINT" assets/js/main.js   # must stay null
 **Every link on the site points somewhere real.** The footer's قانوني column was the last
 holdout and is now wired to `privacy.html`, `terms.html` and a live `mailto:`.
 
-Both legal documents are dated `2026/08/08` — the dashboard-aware rewrite of both pages,
+`terms.html` is dated `2026/08/08`; `privacy.html` moved to `2026/08/18` when the email
+scope and the Pro-lapse retention paragraph were added to it (`terms.html` was not in scope
+for that pass, so the two dates are deliberately different now). Both were originally the
+dashboard-aware rewrite of `2026/08/08`,
 covering the dashboard's login (name/avatar/ID collected, guild list scoped to what you can
 manage, session expiry) and the shortcuts feature's user-authored text. Staged first in
 `txt.txt` (now gitignored — it is scratch, not the copy of record; delete it freely once its
@@ -437,8 +455,10 @@ member, orthogonal to what scope the bot's own application token carries. Ampers
 
 **`updates.html` has zero `data-mock`** — its single release (`1.0.0`, `أغسطس 2026`, `البداية`)
 is real, owner-supplied. Its two header figures are kept in step by hand: `إصدارات` counts
-the `.rel` blocks (**1**), `أنظمة` mirrors the seven systems `#features` advertises (**7**).
-**Do not add a release you cannot date.**
+the `.rel` blocks (**1**), `أنظمة` mirrors the systems `#features` advertises (**8** since
+2026-08-17, was 7 — §4). Nothing enforces that second one; it is a number in a second file
+that silently disagrees with the landing page the moment a system is added, which is exactly
+how it spent a day wrong. **Do not add a release you cannot date.**
 
 **Live network surface: exactly one `fetch`, and it is unreachable.** `readStats()` returns
 the local `STATS` object while `STATS_ENDPOINT` is `null`. The rate-limiting path (TTL
@@ -556,21 +576,29 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   click closes it *and* navigates; outside tap closes; crossing 768px closes it; the closed
   nav exposes **2** links to the a11y tree and the open one **6** (both figures unverified —
   written from the current markup, not a rerun; §6 explains why).
-- **Structure**: 9 bento cards in 5 rows; 7 command groups / 16 rows, each group either
-  carrying a permission pill or a `.cmdgroup__note` (or both) — `الترحيب`, `التحقق بالكابتشا`,
-  `تذاكر الدعم` have both; every `.cmd__name` computes `direction: ltr` and starts with `/`,
-  with no exceptions as of 2026-08-11 (the one Arabic-named row, `/اختصار`, is gone — §4, §6);
-  1 `#dashboard-features` section with exactly 2 `<li>`s and exactly 1 outbound link; 3
-  guarantee panels.
+- **Structure**: 10 bento cards in 5 rows; 22 sprite symbols with none orphaned; 7 command
+  groups / 16 rows, each group either carrying a permission pill or a `.cmdgroup__note` (or
+  both) — `الترحيب`, `التحقق بالكابتشا`, `تذاكر الدعم` have both; every `.cmd__name` computes
+  `direction: ltr` and starts with `/`, with no exceptions as of 2026-08-11 (the one
+  Arabic-named row, `/اختصار`, is gone — §4, §6); 1 `#dashboard-features` section with exactly
+  3 `<li>`s and exactly 1 outbound link; 3 guarantee panels.
 
-Prior totals were **128 assertions + 17 menu assertions, all passing** — measured before the
-`/tickets` system, `/musaed`, the `/about` permission/grouping change, the shortcuts system
-(`/اختصار`), and the `/tickets` type-management subcommands were added to the site
-(2026-08-05), before `updates.html` was unlinked from nav/footer (2026-08-06), and well before
-the `#commands` allow-list rewrite and `#dashboard-features` addition (2026-08-11, §4). The
-9-cards figure is still grep-verified and current; the 45-rows figure is not — it's 16 now.
-The full browser-measured assertion count has not been rerun since 2026-08-05, so treat 128/17
-as stale until the suite is recreated and rerun.
+**Current: 154 assertions, all passing — rerun 2026-08-17** in headless Chrome 152 against
+`python -m http.server`, covering all 5 pages × 9 widths (320, 375, 390, 412, 768, 860, 900,
+1024, 1440) plus the structure and bento-row checks above. 860 and 900 are new and were added
+for a reason: 860px is where `.bento` becomes a 12-column grid, so it is the width at which
+the narrowest card is narrowest, and nothing was measuring it. **This run did not include the
+17 menu assertions** — the 375px open/close/Escape/focus behaviour is still unverified since
+2026-08-05, so treat that 17 as stale even though the 128 is now superseded.
+
+**The bento grid has one row of three since 2026-08-17, and it is load-bearing.** Adding the
+auto-responses card (§4) made it 10 cards — 9 regular plus the full-width `card--full`
+durations card — and 9 is odd, so the four-rows-of-two arrangement could not absorb it. Rows
+are now 7+5, 5+7, 6+6, **4+4+4**, 12. The triple is cards 7–9 (`اختصارات نصية`,
+`الردود التلقائية`, `أوامر واضحة`), which is coherent rather than arbitrary: those are the
+three chat-behaviour cards. Measured narrowest card at the 860px breakpoint: **263px**, with
+all three at equal height. If a card is ever added or removed here, the parity problem comes
+straight back — re-measure, do not assume the spans still tile.
 
 Use `page.accessibility.snapshot({ root })` for accessible names — `innerText` returns `""`
 for `visibility: hidden` elements and will produce false "unnamed control" failures. Root the

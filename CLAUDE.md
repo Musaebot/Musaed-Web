@@ -473,11 +473,18 @@ a real endpoint is a one-constant change. The declaration is space-aligned, so
 (`404.html` carries none of the four and is not part of the twenty — an error page has no
 canonical address.)
 
-**These moved off `musaed.up.railway.app` on 2026-08-08.** That host still serves the site and
-always did, so nothing was broken — which is exactly why it went unnoticed: two live hosts
+**These moved off `musaed.up.railway.app` on 2026-08-08.** That host served the site too and
+always had, so nothing was broken — which is exactly why it went unnoticed: two live hosts
 serving identical content, with `canonical` pointing every crawler and social card at the
 unbranded one, so `musaed.dev` was published as the duplicate of its own Railway URL. A
 domain move that leaves the site *working* at both names is the easy one to leave half-done.
+
+**`musaed.up.railway.app` is retired as of 2026-08-18 and must not be referenced again.**
+The generated Railway service domain may still answer while it remains attached to the
+service, but it is not part of how this site is served, linked, or verified. It used to have
+one real job — reading past Cloudflare to check a CSS/JS deploy — and §9 now does that with a
+cache-busting query string instead, which needs no second host. Treat any surviving mention
+as stale.
 
 ```bash
 grep -ohE 'https://[a-z0-9.-]+' *.html | sort -u
@@ -641,17 +648,34 @@ link from a footer link with the same label.
   confirmed 2026-08-11 via response headers, not guessed.** `index.html` always comes back
   `cf-cache-status: DYNAMIC` (fresh every request); `assets/css/styles.css` and
   `assets/js/main.js` come back `cf-cache-status: HIT` with `Cache-Control: max-age=14400` (4
-  hours), and a Railway redeploy does **not** purge that cache. Caught in the wild: a CSS-only
-  change (new `.dashfeatures`/`.cmdgroup__note` rules) deployed successfully to Railway —
-  confirmed via `musaed.up.railway.app`'s `Last-Modified` header matching the deploy — while
+  hours), and a Railway redeploy does **not** purge that cache. Caught in the wild twice: a
+  CSS-only change (new `.dashfeatures`/`.cmdgroup__note` rules) deployed successfully while
   `musaed.dev` kept serving CSS from over a day earlier, so the same page rendered with full
-  styling on one host and as a plain unstyled list on the other. **If you change CSS or JS and
-  need to verify it's actually live, check `musaed.up.railway.app` (no CDN in front) — not
-  `musaed.dev`, which can lag up to 4 hours.** There is no fix available from this repo: the
-  cache has to be purged from Cloudflare's dashboard (Caching → Configuration → Purge Cache),
-  which is outside anything a git push or Railway action can reach. HTML-only changes (like
-  the `#stats` `hidden` attribute, §1) are unaffected by this, which is why that change worked
-  immediately and this one didn't.
+  styling on one host and as a plain unstyled list on the other; and again 2026-08-17, when a
+  10th bento card shipped against cached CSS that only styled 9, leaving the full-width
+  durations card auto-placed into a single 1/12 column on the live domain until the entry
+  expired.
+
+  **To read past the cache, add a cache-busting query string — do not go looking for a second
+  host.** Verified 2026-08-18: the plain URL returned a week-old file while this returned the
+  copy Railway had just built.
+
+  ```bash
+  curl -sS -H "Cache-Control: no-cache" "https://musaed.dev/assets/css/styles.css?probe=$RANDOM"
+  curl -sSI "https://musaed.dev/assets/css/styles.css" | grep -iE "cf-cache-status|age:|last-modified"
+  ```
+
+  `last-modified` is the reliable tell: compare it against the deploy time. `cf-cache-status:
+  HIT` with a stale `last-modified` is the failure; `MISS` means the edge just refetched.
+  A distinct `?probe=` value each time matters — reusing one caches *that* URL too.
+
+  **This used to say "check `musaed.up.railway.app`, no CDN in front". Don't.** The generated
+  Railway host is no longer part of how this site is served or verified (§7), and the query
+  string above needs no second host anyway. Purging properly still has to happen from
+  Cloudflare's dashboard (Caching → Configuration → Purge Cache), which no git push or Railway
+  action can reach — but a stale entry does expire on its own inside the 4 hours, which is how
+  the 2026-08-17 case resolved. HTML-only changes (like the `#stats` `hidden` attribute, §1)
+  are unaffected, which is why that change worked immediately and these didn't.
 
 ---
 
@@ -675,11 +699,12 @@ After a push, verify against the **remote**, not just locally:
 git ls-remote origin refs/heads/main    # must equal git rev-parse HEAD
 ```
 
-**Then verify the live deploy against `musaed.up.railway.app`, not `musaed.dev`, if the
-change touched CSS or JS** — §9 explains why: Cloudflare caches those for up to 4 hours on
-the branded domain and a redeploy doesn't purge it, so `musaed.dev` can look unchanged (or
-half-changed) right after a push that fully succeeded. `musaed.dev` is still fine to check for
-HTML-only changes.
+**Then verify the live deploy on `musaed.dev` with a cache-busting query string if the change
+touched CSS or JS** — §9 has the exact commands. Cloudflare caches those for up to 4 hours on
+the branded domain and a redeploy doesn't purge it, so the plain URL can look unchanged (or
+half-changed) right after a push that fully succeeded. Check `last-modified` against the
+deploy time, not just whether the page renders. Plain `musaed.dev` is fine for HTML-only
+changes, which are never cached.
 
 Also confirm the push actually triggered a Railway deploy — it doesn't always. `list-deployments`
 should show a fresh entry with `reason: "deploy"` and the new commit hash within a few

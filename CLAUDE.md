@@ -5,6 +5,11 @@ Orientation for an AI agent picking this repo up — read this before you touch 
 run it) and is not a technical reference — don't look there for history, reasoning, or
 implementation detail.
 
+**The landing page was rebuilt on 2026-08-25** from a supplied design mockup: it is now a
+sidebar + six tab panels rather than one long scrolling page. Same content, same URLs — the
+tabs are real anchors and every old `#features`/`#commands`/`#trust`/`#about`/`#about-us`
+deep link still resolves. See `docs/claude/implementation-reference.md` for the panel map.
+
 **This file was split on 2026-08-25 into this slim root plus `docs/claude/*.md` files.**
 Root keeps only identity, the hard rules, and the "Where to find things" table below.
 Everything else — the detailed reference material, the change history, the per-feature
@@ -20,32 +25,33 @@ names, no server IDs. That rule applies to everything you write into this repo.
 ## 1. What this is
 
 A **static public marketing site** for **مساعد (Musaed)**, an Arabic (Saudi dialect)
-moderation/automod Discord bot. Four pages. It explains the bot to server owners before they
+moderation/automod Discord bot. Three pages. It explains the bot to server owners before they
 add it.
 
 It is **not** a dashboard, and nothing on it manages anything or shows real guild data —
-this repo itself has no login state, no account, no backend. The two login buttons (nav +
-hero) are outbound links to the dashboard's own OAuth2 flow, a **separate application on a
-separate origin** (see `docs/claude/dashboard.md`) — same category of link as the Discord bot-invite buttons, not
-auth scaffolded in this repo.
+this repo itself has no login state, no account, no backend. The two «لوحة التحكم» buttons
+(sidebar + topbar) are plain outbound links to the dashboard's own OAuth2 flow, a **separate
+application on a separate origin** (see `docs/claude/dashboard.md`) — same category of link
+as the Discord bot-invite buttons, not auth scaffolded in this repo. They pointed at a local
+`connect.html` interstitial until 2026-08-25; that page was removed (`docs/claude/page-notes.md`)
+and they now link straight to the dashboard, which serves its own pre-OAuth disclosure.
 
 ```text
-index.html                 landing page + its inline icon sprite (22 symbols)
+index.html                 landing page: 6 tab panels + its inline icon sprite (22 symbols)
 404.html                   custom error page, served by Caddy - see docs/claude/testing-and-traps.md
-connect.html               pre-auth disclosure screen before the dashboard login - see docs/claude/placeholders-and-domain.md
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
 google82b70d7af988f7a9.html  Google Search Console site-verification file - see docs/claude/page-notes.md
-sitemap.xml                lists the 3 real pages (not connect.html, not 404.html) - see docs/claude/placeholders-and-domain.md
+sitemap.xml                lists all 3 real pages (not 404.html) - see docs/claude/placeholders-and-domain.md
 robots.txt                 Allow: / for everyone, points at sitemap.xml - see docs/claude/placeholders-and-domain.md
 assets/css/styles.css      tokens, reset, shared components
-assets/css/legal.css       connect.html + BOTH legal pages, loaded after styles.css
-assets/js/main.js          stats data, count-up, scroll reveals, nav, link guard
+assets/css/legal.css       BOTH legal pages, loaded after styles.css
+assets/js/main.js          tab router, command filter, scroll reveals, stats data + count-up, link guard
 assets/fonts/              self-hosted woff2 (IBM Plex Sans Arabic + Plex Mono)
 assets/Pics/               brand marks. Capital P — Linux hosts are case-sensitive
 ```
 
-Four pages, two stylesheets, one script. **Zero dependencies, zero build step.** There used
+Three pages, two stylesheets, one script. **Zero dependencies, zero build step.** There used
 to be more: `developer.html` was removed along with its CSS and JS, and do not resurrect it.
 `updates.html` (the changelog) was removed on 2026-08-25 along with `assets/css/updates.css`
 — see `docs/claude/page-notes.md` for the full removal record, and the notes on the Google

@@ -5,11 +5,30 @@ command the bot does not answer to is worse than one listing nothing.
 
 Two places go stale when the bot's command surface changes, and only these two:
 
-1. the `.chip` lists in `#features`
-2. `#commands` — the full reference: **7 groups, 16 subcommand rows** (down from 9/45 as of
-   2026-08-11 — see below)
+1. the `.chip` list in the durations call-out in `#features`
+2. `#commands` — **16 command rows in one flat list**, filtered client-side by three
+   categories (`mod` 5, `setup` 8, `info` 3)
 
 Both are plain HTML in `index.html`. No generator; sync by hand.
+
+**The 7 groups became 1 flat list on 2026-08-25**, in the design rebuild — the same 16 rows
+from the 2026-08-11 allow-list, none added, none removed, but no longer boxed into
+`.cmdgroup` articles with a heading and a permission pill each. Each row now carries its own
+scope in a third column (`صلاحيات ديسكورد` / `إدارة السيرفر` / `متاح للكل`), which is strictly
+more precise than the old per-group pill: `/about` sits in the `info` filter but needs
+`إدارة السيرفر`, and the group layout could not express that. **Consequences for anything
+that referenced the old structure:** there is no `.cmdgroup`, no `.cmdgroup__title`, no
+`.cmdgroup__perm` and no `.cmdgroup__note`; the three identical
+"باقي الإعدادات من dashboard.musaed.dev." lines collapsed into **one** `.cmds__note` under the
+whole list. `#dashboard-features` survived unchanged (3 `<li>`s, one shared dashboard link)
+and now sits inside the `#commands` panel.
+
+**The mockup's command list was wrong in two ways and both were corrected on the way in.**
+It listed 14 rows, folding `/prefix reset` into `/prefix set`'s description and omitting
+`/prefix show` — all three are on the owner's allow-list and all three are now their own row.
+And it gave `/about` the scope `متاح للكل`; the real permission is `إدارة السيرفر`, which is
+exactly the drift this file's "round two" note below records. Don't reintroduce either from
+the mockup file.
 
 **`#commands` is deliberately no longer a full reference — as of 2026-08-11 it is a curated
 subset plus dashboard pointers.** The project owner supplied an exact allow-list of 16 real
@@ -70,7 +89,7 @@ define their own trigger word mapped to ban/kick/timeout — a peer of agegate/c
 in the bot's settings layer, not a sub-feature of moderation. It had its own group
 (`اختصارات نصية`, icon `i-lightning`, pill `مدير السيرفر`) until 2026-08-11, when it was
 removed from `#commands` along with everything else not on the owner's 16-command allow-list
-(see above). **Its bento card in `#features` was not touched** — that section wasn't in scope
+(see above). **Its card in `#features` was not touched** — that section wasn't in scope
 for the 2026-08-11 change — so the feature is still described there, just no longer given its
 own command-reference row. `/اختصار` was also the one command name on the page written in
 Arabic rather than Latin, styled with `.cmd__name--ar` (`text-align: start`, `--sans` instead
@@ -112,7 +131,7 @@ duration parsing, which is the most distinctive feature and is worth keeping pro
 **It was seven until 2026-08-17.** Auto-responses (`الردود التلقائية`) shipped on the bot
 side 2026-08-16 and the site had never mentioned it — found by diffing the bot/dashboard
 product inventory against this repo, which is exactly the check the paragraph below this
-section's history describes. It got a `#features` bento card (icon `i-chat-text`) and a
+section's history describes. It got a `#features` card (icon `i-chat-text`) and a
 `#dashboard-features` row, and the site's seven-count moved to eight: `#features`'s lede
 (`سبعة أنظمة` → `ثمانية أنظمة`). (`updates.html` also carried a matching `أنظمة` figure at
 the time; it no longer exists — removed 2026-08-25, above.) It has no slash commands at all,
@@ -133,3 +152,33 @@ this page's point of view (see `#dashboard-features`, above). Don't use "it's no
 
 **`#trust` quotes no numbers** for retention windows or automod thresholds — those are
 server-configurable defaults, not promises. Do not add figures there.
+
+## The FAQ — new on 2026-08-25, and the two claims that were checked
+
+`#faq` (أسئلة شائعة) is a six-item `<details>` accordion added in the design rebuild. It is
+the first section on this site that answers questions rather than describing features, so it
+is also the easiest place to publish something untrue. Two of the six came from the mockup
+carrying claims this repo could not support, and both were changed with the owner's
+decision:
+
+- **"أحتاج أعطيه صلاحية أدمن؟"** The mockup answered **«لا»**. That is false as written: the
+  live invite requests `permissions=8` — Administrator — and does so deliberately
+  (`docs/claude/placeholders-and-domain.md`). Publishing "no admin needed" beside an invite
+  screen that pre-ticks Administrator would have been the page contradicting its own button.
+  The shipped answer says the invite does ask for it, that the age gate genuinely needs it
+  and the rest need Manage Server (per `docs/claude/dashboard.md`), and then draws the
+  distinction that actually matters: **the bot's grant is not the user's grant** — every
+  moderation command still checks the invoking member's permissions and role position first.
+  That is the same claim `#trust`'s صلاحياتك هي القرار makes, and it stays true regardless of
+  what the OAuth scope carries.
+- **"مساعد مجاني؟"** The mockup promised a Pro plan with **«حدود أعلى وميزات إضافية»**. A Pro
+  tier is real — `privacy.html` references باقة برو and a 21-day post-lapse window — but
+  nothing in this repo establishes *what* Pro adds, and the marketing site had never made a
+  pricing claim at all. Shipped as "core systems free for every server, an optional Pro tier
+  above it", with no description of what Pro includes. **If you are asked to describe Pro,
+  get the details from the owner rather than inferring them from the dashboard or the bot.**
+
+The other four (Arabic-first, where settings live, settings surviving a re-add, support)
+restate claims already made elsewhere on the page and were left as written. The
+settings-survival answer deliberately quotes **no retention figure** — same rule as `#trust`
+below: those are configurable defaults, not promises.

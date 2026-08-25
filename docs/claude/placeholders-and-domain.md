@@ -8,7 +8,7 @@
 ```bash
 grep -rn "data-mock" index.html               # 3 — all in #stats
 grep -rn "data-placeholder-link" index.html   # 0 — every link is real now
-grep -c  "oauth2/authorize" index.html        # 3 — the live invite, must be identical
+grep -c  "oauth2/authorize" index.html        # 4 — the live invite, must be identical
 grep -n  "STATS_ENDPOINT" assets/js/main.js   # must stay null
 ```
 
@@ -25,8 +25,11 @@ manage, session expiry) and the shortcuts feature's user-authored text. Staged f
 content is absorbed) before being split into `privacy.html` / `terms.html` by hand. The only
 invented values left anywhere on the site are the three `#stats` numbers.
 
-**The bot invite is live and appears three times** (nav, hero, about), each opening in a new
-tab with `rel="noopener noreferrer"`. There is no single source for the URL, so a change to
+**The bot invite is live and appears four times in the DOM** — sidebar footer, phone header,
+desktop topbar, hero — each opening in a new tab with `rel="noopener noreferrer"`. It was
+three (nav, hero, about) until the 2026-08-25 rebuild. Two of the four are mutually exclusive
+by media query, so a visitor sees three on desktop and two on a phone; see
+`docs/claude/implementation-reference.md` for which is which. There is no single source for the URL, so a change to
 one is a change to all three. Its `permissions` integer is what Discord pre-ticks on the
 authorize screen — editing it changes what the bot is granted on join, so do not "tidy" it.
 
@@ -78,38 +81,50 @@ That must print exactly four hosts: the site's, `discord.gg` for the community i
 bot-invite URL and the link to Discord's own terms, and
 `dashboard.musaed.dev` — the dashboard (a separate deployable, `docs/claude/dashboard.md`).
 
-**The dashboard host appears 5 times as of 2026-08-11: once in `connect.html`, four times in
-`index.html`.** Until 2026-08-11 it was referenced exactly once, in `connect.html` — the two
-login buttons in `index.html` (nav + hero) point at `connect.html`, the pre-auth disclosure
-screen, whose "فهمت، كمّل" button is the single outbound link to the dashboard, and that was
-the *only* place the host string appeared. The `#commands` allow-list rewrite
-(`docs/claude/copy-accuracy.md`) added four
-more, direct `<a href="https://dashboard.musaed.dev">` links: three identical
-`.cmdgroup__note` lines (`الترحيب`, `التحقق بالكابتشا`, `تذاكر الدعم`) and one in
-`#dashboard-features`. These are deliberately **not** routed through `connect.html` — they're
-informational "read more about this feature" pointers, not the prominent "log in" CTAs
-`connect.html` exists to intercept, and the dashboard has its own `/auth/connect` disclosure
-that fires before OAuth regardless of how someone arrives. If the dashboard host ever moves,
-grep will now surface 5 lines across 2 files, not 1 line in 1 file — update all of them. The
-20 `canonical`/`og:url`/`og:image`/`twitter:image` URLs below are a separate set and stay
-pointed at the site's own host exclusively — unaffected by this.
+**The dashboard host appears 5 times as of 2026-08-25, all in `index.html`.** Its history is
+worth knowing, because the shape keeps changing under it:
 
-`connect.html` is a **content page, not auth** — no session, no OAuth, no protected state, so
-root `CLAUDE.md`'s Hard Rule 4 is intact. The dashboard serves its own copy of the same disclosure at `/auth/connect`,
-because `/auth/login` is a public URL that a bookmark or a stale third-party link reaches
-without passing through this site. **The two wordings must stay in sync**; the other one is
-`app/templates/connect.html` in the Musaed-Dashboard repo.
+| When | Count | Where |
+| --- | --- | --- |
+| until 2026-08-11 | 1 | `connect.html` only — the login buttons pointed at *that page*, not at the host |
+| 2026-08-11 | 5 | plus 3 `.cmdgroup__note` lines and 1 in `#dashboard-features` |
+| 2026-08-25 (rebuild) | 4 | the flat command list collapsed the 3 notes into 1; `#faq` added 1 |
+| 2026-08-25 (connect removed) | **5** | `connect.html` deleted, its 1 gone — but both login buttons now carry the host directly |
+
+Today that is **2 login hrefs** (`https://dashboard.musaed.dev/auth/login` — the sidebar
+«لوحة التحكم» button and the topbar icon link) plus **3 informational links** (`.cmds__note`,
+`#dashboard-features`, and the "وين أضبط الأنظمة؟" FAQ answer). The informational three stay
+bare `https://dashboard.musaed.dev` on purpose: they are "read more about this feature"
+pointers, not "log in" CTAs. If the dashboard host ever moves, **grep for the host, not for
+`auth/login`** — all five live in one file now, but they are two different kinds of link and
+only the two login ones carry a path. The 12 `canonical`/`og:url`/`og:image`/`twitter:image`
+URLs are a separate set pointed at this site own host exclusively, unaffected by any of it.
+
+**`connect.html` was removed on 2026-08-25** — see `docs/claude/page-notes.md` for the full
+record. It was the pre-auth disclosure screen the two login buttons used to pass through: a
+**content page, not auth** — no session, no OAuth, no protected state — so root
+`CLAUDE.md` Hard Rule 4 was intact before and is intact now. There is simply one fewer page,
+and the buttons link straight out.
+
+**The disclosure itself did not disappear with it.** The dashboard serves its own copy at
+`/auth/connect` and always has, because `/auth/login` is a public URL that a bookmark or a
+stale third-party link reaches without passing through this site at all. That copy
+(`app/templates/connect.html` in the Musaed-Dashboard repo) is now the only one — so the
+**"keep the two wordings in sync" obligation this section used to carry no longer applies
+here**, because there is nothing left in this repo to sync it against. If you are ever asked
+to restore a pre-auth screen on the marketing site, check first whether the dashboard own
+screen is considered insufficient: duplicating it is exactly what created the sync burden.
 
 **The dashboard's host changed on 2026-08-08** (it was a generated `*.up.railway.app` name)
 and the old one was **deleted, not left redirecting** — so both login buttons pointed at a
 dead host until they were updated. That is the same failure this section warns about below,
 one host over: nothing in this repo breaks visibly when a *different* deployable moves, because
 the links still render fine and only fail on click. If the dashboard host ever moves again,
-grep for the host, not for `auth/login` — the `href` carrying it now lives in `connect.html`.
+grep for the host, not for `auth/login` — the two `href`s carrying it now live in `index.html`.
 
 A domain move is **not** done when the site loads at the new address; it is done when all
-sixteen URLs are updated (it was twenty before `updates.html` was removed — see
-`docs/claude/page-notes.md`). This has now
+twelve URLs are updated — twenty before `updates.html` was removed, sixteen until
+`connect.html` went the same way on 2026-08-25 (see `docs/claude/page-notes.md`). This has now
 bitten twice, in both directions: once when an old host
 404'd and half the site still pointed at it, so social cards referenced a dead image — and
 again on 2026-08-08, when the old host kept working and nothing looked wrong at all. The first
@@ -120,12 +135,14 @@ trusting the site to tell you.
 
 `sitemap.xml` lists exactly the three real, indexable pages — `/`, `/privacy.html`,
 `/terms.html` — each with a `<lastmod>` taken from that file's last commit date, not
-invented. **Deliberately excludes two pages that otherwise look like they belong:**
-`connect.html` (a functional pre-auth step, not content someone should land on from a search
-result) and `404.html` (an error page has no canonical address — same reasoning as the
-`canonical`/`og:url` exclusion above). `updates.html` used to be a third deliberate
-inclusion (unlinked from nav/footer but still live and real — `docs/claude/page-notes.md`) until it was removed
-outright on 2026-08-25 — its sitemap entry went with it.
+invented. **It now lists every page the site has except `404.html`**, excluded because an error page
+has no canonical address — same reasoning as the `canonical`/`og:url` exclusion above. It
+used to deliberately exclude a second one, `connect.html` (a functional pre-auth step, not
+content someone should land on from a search result); that page was removed outright on
+2026-08-25, so the exclusion is moot. `updates.html` was a third (unlinked from nav/footer
+but still live and real — `docs/claude/page-notes.md`) until it too was removed the same day,
+taking its sitemap entry with it. **Neither removal needed a sitemap edit** — `connect.html`
+was never listed, and `updates.html` was the only one that had been.
 
 `robots.txt` allows everything and points at the sitemap. Both files hold absolute
 `musaed.dev` URLs but are **not** `.html`, so they are invisible to the `grep -ohE

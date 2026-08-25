@@ -19,43 +19,93 @@ npx @puppeteer/browsers install chrome-headless-shell@stable
 
 The suite that currently passes lives outside the repo. Recreate it to assert:
 
-- **Per page × width** (320, 375, 390, 412, 768, 1024, 1440 — all four pages): no horizontal
-  overflow (`scrollWidth <= clientWidth`); no interactive element under 24×24; no unnamed
-  link or button; no console or network errors. **Apply the WCAG 2.5.8 inline exemption** —
-  a link inside a sentence is size-constrained by line-height and is not a failure.
-- **Nav**: 4 links on one line at ≥768px, each ≥44×44, and report the slack.
-- **Menu behaviour** (375px): starts closed; click opens; panel sits flush under the bar;
-  Escape closes and returns focus to the button; Tab from the button enters the menu; a link
-  click closes it *and* navigates; outside tap closes; crossing 768px closes it; the closed
-  nav exposes **2** links to the a11y tree and the open one **6** (both figures unverified —
-  written from the current markup, not a rerun; `docs/claude/design-and-invariants.md` explains why).
-- **Structure**: 10 bento cards in 5 rows; 22 sprite symbols with none orphaned; 7 command
-  groups / 16 rows, each group either carrying a permission pill or a `.cmdgroup__note` (or
-  both) — `الترحيب`, `التحقق بالكابتشا`, `تذاكر الدعم` have both; every `.cmd__name` computes
-  `direction: ltr` and starts with `/`, with no exceptions as of 2026-08-11 (the one
-  Arabic-named row, `/اختصار`, is gone — `docs/claude/copy-accuracy.md`,
-  `docs/claude/design-and-invariants.md`); 1 `#dashboard-features` section with exactly
-  3 `<li>`s and exactly 1 outbound link; 3 guarantee panels.
+- **Per page × width** (320, 375, 390, 412, 768, 860, 900, 1024, 1440 — all three pages): no
+  horizontal overflow (`scrollWidth <= clientWidth`); no interactive element under 24×24; no
+  unnamed link or button; no console or network errors. **Apply the WCAG 2.5.8 inline
+  exemption** — a link inside a sentence is size-constrained by line-height and is not a
+  failure.
+- **Structure** (`index.html`): 22 sprite symbols with none orphaned; 6 tabs and 6 panels;
+  exactly one panel visible on load, and it is `#top`; 16 command rows; 4 filter chips; 6 FAQ
+  items; 9 cards in `#features`; 3 in `#trust`; `#dashboard-features` with exactly 3 `<li>`s
+  and exactly 1 outbound link; every `.cmd__name` computes `direction: ltr` and starts with
+  `/`, with no exceptions.
+- **Tab routing**: a tab click swaps the visible panel, pushes the hash, moves
+  `aria-current="page"`, and updates the topbar crumb; browser Back returns to the previous
+  panel; an in-page CTA (`.hero__actions a[href="#features"]`) routes through the same
+  handler so the tabs can never disagree with what is on screen.
+- **Deep links, at 390px and 1440px** — `#top`, `#features`, `#commands`, `#trust`, `#faq`,
+  `#about-us`, plus the two nested anchors `#about` and `#dashboard-features`: each opens the
+  right panel, and **a panel deep link lands at `scrollY === 0`** while a nested one scrolls
+  past zero to its element. That scroll assertion is the one that caught a real bug — see the
+  `scroll-behavior` trap below.
+- **Filtering**: all=16, mod=5, setup=8, info=3, the three summing to 16, and exactly one
+  chip carrying `aria-pressed="true"`.
+- **No-JS** (`page.setJavaScriptEnabled(false)`): all 6 panels rendered, all 16 command rows
+  rendered, filter chips `display: none`, the menu toggle `display: none`, `.reveal` elements
+  at `opacity: 1`, and `.foot__nav` carrying all six tab hrefs — that last one is the
+  assertion that stops a new tab from silently stranding no-JS phones.
+- **connect.html is gone**: `/connect.html` returns 404; no `a[href*="connect.html"]` remains
+  on the site; exactly 2 links point at `dashboard.musaed.dev/auth/login` and 5 at the
+  dashboard host in total.
+- **Menu behaviour** (320/375/412): `.side` computes `position: sticky`; `.topbar` is
+  `display: none`; the toggle is shown; the menu starts closed with `aria-expanded="false"`
+  and `visibility: hidden`; the panel's invite is `display: none` so the invite is not
+  duplicated on one screen. Then: the closed menu exposes **0** links and the open one **10**
+  (6 tabs + لوحة التحكم + 3 legal); a click opens it and the panel sits flush under the bar
+  and inside the viewport; Escape closes it and returns focus to the toggle; a link click
+  closes it *and* navigates; an outside tap closes it; crossing 900px with it open clears
+  both `aria-expanded` and `is-open`.
+- **Desktop chrome** (1440): `.side` sticky and exactly 256px; `.topbar` shown;
+  `.side__actions` hidden; `.side__menu` `visibility: visible`; every tab ≥44px tall.
+- **FAQ**: starts fully closed; opening a second item closes the first (native
+  `<details name>` exclusive accordion).
+- **Contrast**: for every unique colour+size+background combination on the page, composite
+  each translucent layer over what is behind it up to the page background, then require AA
+  (4.5:1, or 3:1 for large text). **Compositing is the whole point** — judging a label on
+  `--accent-soft` (9% alpha) against the panel colour alone reports 1:1 and judging it
+  against `--bg` alone reports a value it never actually has.
 
-**154 assertions, all passing — rerun 2026-08-17** in headless Chrome 152 against
-`python -m http.server`, covering all 5 pages *(now 4 — `updates.html` was removed
-2026-08-25, `docs/claude/page-notes.md`; this count is stale by one page and hasn't been
-rerun since)* × 9 widths
-(320, 375, 390, 412, 768, 860, 900, 1024, 1440) plus the structure and bento-row checks
-above. 860 and 900 are new and were added
-for a reason: 860px is where `.bento` becomes a 12-column grid, so it is the width at which
-the narrowest card is narrowest, and nothing was measuring it. **This run did not include the
-17 menu assertions** — the 375px open/close/Escape/focus behaviour is still unverified since
-2026-08-05, so treat that 17 as stale even though the 128 is now superseded.
+**231 assertions, all passing — rerun 2026-08-25** in headless Chrome 152 against
+`python -m http.server`, covering the three pages × nine widths plus everything above. This
+supersedes the old 154-assertion suite entirely: that one asserted on `.bento` and
+`.cmdgroup`, neither of which exists after the rebuild. Its 17 menu assertions were stale
+since 2026-08-05; the phone menu is asserted again here, and this time the run is real.
 
-**The bento grid has one row of three since 2026-08-17, and it is load-bearing.** Adding the
-auto-responses card (`docs/claude/copy-accuracy.md`) made it 10 cards — 9 regular plus the full-width `card--full`
-durations card — and 9 is odd, so the four-rows-of-two arrangement could not absorb it. Rows
-are now 7+5, 5+7, 6+6, **4+4+4**, 12. The triple is cards 7–9 (`اختصارات نصية`,
-`الردود التلقائية`, `أوامر واضحة`), which is coherent rather than arbitrary: those are the
-three chat-behaviour cards. Measured narrowest card at the 860px breakpoint: **263px**, with
-all three at equal height. If a card is ever added or removed here, the parity problem comes
-straight back — re-measure, do not assume the spans still tile.
+**Worst measured contrast on the page is 4.99:1** (white on `--discord`). Every grey clears
+comfortably: `--text-dim` 7.4:1, `--text-mute` 6.1:1, `--text-faint` 5.3:1 on `--bg`. The
+mockup's faintest grey (`#69726C`, used for footer and sidebar legal links at 12px) measured
+**3.92:1** and was replaced rather than shipped — that was the one accessibility defect
+carried in from the design file.
+
+## Traps found by measuring, not reading
+
+**`scroll-behavior: smooth` on `html` breaks deep links into a tabbed page.** On a cold load
+of `/#faq` the browser performs its own scroll to the fragment target *after* the deferred
+script has already run and reset the scroll position — and with a global smooth scroll that
+browser scroll is a ~150ms animation, so it starts late and wins. The panel lands with its
+heading under the sticky bar (measured: `scrollY` 116 at 390px, 58 at 1440px). Removing the
+global smooth scroll makes the browser's jump instant; the router still asks for smooth
+explicitly on nested anchors. Even then one reset is not enough — see `resetScroll(persist)`
+in `docs/claude/implementation-reference.md`.
+
+**A grid item's automatic minimum is its min-content width, and a scrolling child does not
+save you.** `.app { grid-template-columns: 1fr }` sized the column to the six-tab nav's 468px
+min-content width and pushed every phone width sideways — even though `.tabs` carried its own
+`overflow-x: auto` at the time. `minmax(0, 1fr)` on the track plus `min-width: 0` on `.side`
+is the fix, and both are still there because any wide child would do the same thing again.
+This is invisible in the stylesheet and only shows up as `scrollWidth 468 > clientWidth 375`.
+
+**An `IntersectionObserver` on a node inside a `hidden` ancestor never fires**, which is why
+`refreshReveals()` re-observes a panel's nodes when it opens rather than trusting the
+original `observe()` call. The same property is what makes `#stats` harmless while hidden.
+
+**The bento grid and its hand-placed 12-column spans are gone as of 2026-08-25.** It used to
+tile 10 cards into rows of 7+5, 5+7, 6+6, 4+4+4, 12, and because 9 regular cards is an odd
+number the arrangement had a parity problem that came back every time a card was added or
+removed — the note that used to sit here existed to warn about exactly that. The rebuild's
+`.grid` is `repeat(auto-fit, minmax(min(100%, 270px), 1fr))`, so cards tile themselves at
+every width and there is nothing left to re-measure when one is added. Card counts still
+matter for accuracy (`docs/claude/copy-accuracy.md`); card *placement* no longer does.
 
 Use `page.accessibility.snapshot({ root })` for accessible names — `innerText` returns `""`
 for `visibility: hidden` elements and will produce false "unnamed control" failures. Root the
@@ -64,8 +114,9 @@ link from a footer link with the same label.
 
 ## Traps that have already cost time
 
-- **Reveal stagger vs. screenshots.** `main.js` staggers `--d` by 80ms per sibling, so the
-  7th bento card waits 480ms before its 700ms fade *starts*. A short fixed wait catches late
+- **Reveal stagger vs. screenshots.** `main.js` staggers `--d` by 70ms per sibling inside a
+  `data-stagger` container, capped at the 9th, so the last card in `#features` waits 560ms
+  before its 620ms fade *starts*. A short fixed wait catches late
   elements mid-transition and makes a correct layout look like missing content. Inject
   `.reveal{opacity:1!important;transform:none!important;transition:none!important}` instead
   of waiting it out.

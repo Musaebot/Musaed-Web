@@ -12,66 +12,135 @@ HTTP: `python -m http.server 8000` or `npx serve .`, then open `localhost:8000`.
 any static host (Cloudflare Pages, Netlify, Vercel, Railway's staticfile provider) with zero
 config — no build command, output directory is the repo root.
 
-## `index.html` section anchors
+## `index.html` panels and anchors
 
-| Anchor | Heading | Purpose |
+**Rebuilt 2026-08-25 from a design mockup.** The page was one long scroll with anchor
+sections; it is now a sidebar (a sticky header on phones) plus **six tab panels**, only one
+of which is rendered at a time. Nothing was dropped — two of the old sections now live
+*inside* a panel rather than owning one.
+
+Every panel is present in the HTML and nothing is hidden until `main.js` runs, so a crawler
+and a no-JS browser get the whole document. The tabs are `<a href="#panel-id">`, not buttons,
+which is what keeps the old URLs working in both modes.
+
+| Tab | Panel id | Contains |
 | --- | --- | --- |
-| (hero) | سيرفرك مرتب، وانت مرتاح | value prop, primary CTA |
-| `#features` | كل اللي يحتاجه سيرفرك | the eight systems, bento grid of 10 cards |
-| `#commands` | كل الأوامر | curated command list, 7 groups / 16 rows |
-| `#dashboard-features` | ميزات تُدار من الداشبورد | the 3 systems with no slash commands |
-| `#stats` | مساعد بالأرقام | public counters (mock) — **`hidden`**, `docs/claude/page-notes.md` |
-| `#trust` | بيانات سيرفرك تبقى لسيرفرك | the three product guarantees |
-| `#about` | مبني لمجتمعات عربية | about the **bot**: Arabic-first |
-| `#about-us` | من نحن | about the **project and people**, plus the community server |
+| البداية | `#top` | hero + 3 facts, 4 quick cards, `#about`, `#stats` (`hidden`) |
+| الأنظمة | `#features` | the eight systems, 9 cards + the durations call-out |
+| الأوامر | `#commands` | filter chips, 16 command rows, `#dashboard-features` |
+| الأمان | `#trust` | the three product guarantees |
+| أسئلة شائعة | `#faq` | 6 `<details>` items — **new in this rebuild** |
+| من نحن | `#about-us` | the project and people, plus the community server |
 
-`#about` and `#trust` used to overlap (`#about` asserted tenant isolation in one clause);
-that claim now lives only in `#trust`, where it has room to say *how*. Don't put it back in
-both. `#about` and `#about-us` are intentionally separate — product vs. people — and
+`#about` (مبني لمجتمعات عربية) and `#dashboard-features` are **nested anchors**: they have no
+tab of their own, and hitting `/#about` opens the panel that contains it and then scrolls to
+the element. `#about` and `#trust` used to overlap (`#about` asserted tenant isolation in one
+clause); that claim now lives only in `#trust`, where it has room to say *how*. Don't put it
+back in both. `#about` and `#about-us` are intentionally separate — product vs. people — and
 `#about-us` is written in neutral project voice with no names, dates, or team size on
 purpose; that's the section to edit if it should read as a solo maintainer.
 
+## The tab router
+
+`initTabs()` in `main.js`. Roughly 120 lines and worth reading before changing any of it.
+
+- **A tab click is intercepted, not followed.** The handler `preventDefault`s, `pushState`s
+  the hash, and swaps which panel carries `hidden`. `popstate` and `hashchange` both route
+  back through `syncFromHash()`, so back/forward and a pasted URL behave identically.
+- **A delegated document-level handler catches every other `a[href^="#"]`** — the hero CTA,
+  the brand mark, footer links. Without it an in-page link could leave the page showing a
+  panel the tabs disagree with.
+- **`scroll-behavior: smooth` is deliberately NOT set on `html`.** A global smooth scroll
+  turns the browser's own fragment jump on a cold `/#faq` load into a ~150ms animation that
+  *starts after* the router has already reset the scroll position — and wins, landing the
+  panel with its heading tucked under the sticky bar. Measured, not theorised. The router
+  asks for smooth explicitly where it wants it (nested anchors).
+- **The initial route re-asserts `scrollTo(0, 0)` for six frames and again at `load`**
+  (`resetScroll(persist)`). Even with the instant fragment jump the browser can scroll after
+  the script runs; one reset is not enough. Later resets, from tab clicks, have no such
+  competition and use the single call.
+- **Panels get `tabindex="-1"` and focus on click**, so the next Tab press resumes inside
+  what was just opened rather than at a control that scrolled away.
+
 ## The phone menu
 
-Below 768px the nav links become a panel under the bar, opened by `.nav__toggle`. It's a
-plain disclosure, not a modal — no focus trap, no scroll lock, no overlay.
+Below 900px the tabs live in a panel under the bar, opened by `.side__toggle`. It's a plain
+disclosure, not a modal — no focus trap, no scroll lock, no overlay. `initMenu()` in
+`main.js`.
 
-- **DOM order is brand, button, panel, CTA, login icon.** The toggle button sits immediately
-  before the panel it controls, so tabbing out of it lands in the menu with no focus
-  management needed, and DOM/visual/focus order agree at both breakpoints. No `order`
-  property anywhere.
+**The first cut of the rebuild used a horizontally scrolling tab strip instead**, and it was
+replaced with the hamburger on the same day, at the owner's request. If you find a
+`keepTabVisible()` reference anywhere, it belonged to that strip and is gone.
+
+- **DOM order is brand, invite, toggle, panel.** The toggle sits immediately before the panel
+  it controls, so tabbing out of it lands in the menu with no focus management needed, and
+  DOM/visual/focus order agree at both breakpoints. No `order` property anywhere.
 - **The panel is hidden with `visibility`, not `opacity` alone** — that's what keeps its
-  links out of the tab order and accessibility tree while closed.
-- **Mobile is the base, desktop is the override.** `.nav__links` defaults to the dropped
-  panel; the `min-width: 768px` block turns it back into a row.
-- **Opening the menu pins the bar solid.** `nav-solidify` (§ below) leaves the bar at 35%
-  opacity until 140px of scroll, and a menu hanging off a see-through bar looks broken.
-  `.nav.is-open { animation: none }` releases it — a plain declaration beating a running
-  animation without `!important`.
-- **Without JS the toggle button is hidden**, since it couldn't do anything. The footer is
-  the fallback and must carry every nav destination (`docs/claude/design-and-invariants.md`)
-  — add a link to both or no-JS phones lose it.
+  links out of the tab order and accessibility tree while closed. The `visibility` transition
+  is delayed by the fade duration on close and zero on open, so it fades out rather than
+  vanishing.
+- **Mobile is the base, desktop is the override.** `.side__menu` defaults to the dropped
+  panel; the `min-width: 900px` block turns it back into the sidebar's body, with the toggle
+  and the header invite hidden.
+- **The invite is not duplicated on one screen.** `.side__invite` (header) shows only below
+  900px; `.side__foot-invite` (in the panel) is `display: none` there and only appears in the
+  desktop sidebar. Four invite links in the DOM, never more than three visible.
+- **Without JS the toggle is hidden**, since it couldn't do anything, and the footer is the
+  fallback — `.foot__nav` carries all six tab destinations for exactly this case. Add a tab
+  and you must add a footer link, or no-JS phones lose it.
+- **Escape closes and returns focus to the toggle; an outside tap closes; crossing 900px with
+  it open clears `is-open`** — otherwise a rotation leaves the class set on a sidebar that no
+  longer has a panel.
+- **The panel caps at `min(70dvh, 560px)` and scrolls internally**, so a short phone in
+  landscape cannot end up with a menu taller than the screen.
 
-## Motion: scroll-driven effects
+## Phone layout, generally
+
+- **`.app` uses `minmax(0, 1fr)`, never `1fr`.** A grid item's automatic minimum is its
+  min-content width, so the nav sized the whole column to 468px and pushed the page sideways
+  at every phone width. `.side` also carries `min-width: 0` for the same reason. Measured at
+  320/375/390/412px, not guessed. This bit with the scrolling tab strip and would bite again
+  with any wide child.
+- **The desktop `.topbar` is `display: none` on phones**; the header carries the invite and
+  the panel carries the dashboard link.
+- **Command rows stack below 700px.** The three-column grid
+  (`minmax(140px, 175px) 1fr auto`) only earns its columns when the description still has
+  room beside a fixed-width name; `.cmd`'s base state is a single column.
+- **Without JS the filter chips are hidden** (`.no-js .filters`), since all sixteen rows are
+  rendered anyway and the controls could not do anything.
+- **320px still fits brand + invite + toggle on one row**, but only because `.side__invite`
+  sheds padding below 900px and again below 360px. That's the tightest thing on the page.
+
+## Motion
 
 Layer 1 (baseline) is the `IntersectionObserver`-driven `.reveal` staggering already covered
-in `docs/claude/design-and-invariants.md`. Layer 2 is progressive enhancement: native CSS scroll-driven timelines in one
-`@supports (animation-timeline: view())` block at the bottom of `styles.css`, skipped
-entirely outside Chromium 115+ / Safari 26+ (layer 1 carries the page fine on its own there).
+in `docs/claude/design-and-invariants.md`. Layer 2 is progressive enhancement: native CSS
+scroll-driven timelines in one `@supports (animation-timeline: view())` block at the bottom
+of `styles.css`, skipped entirely outside Chromium 115+ / Safari 26+ (layer 1 carries the
+page fine on its own there).
 
 | Effect | Timeline | What it does |
 | --- | --- | --- |
-| `progress-grow` | `scroll(root)` | read-progress line under the nav, grows from the right |
-| `nav-solidify` | `scroll(root)` | nav fades from near-transparent to solid over 140px |
-| `hero-recede` | `view()` | hero copy recedes as the hero exits |
-| `hero-drift` | `view()` | wordmark drifts slower than the copy, separating the layers |
+| `hero-glow` | (time) | the hero's radial glow breathes — not scroll-linked |
 | `glow-drift` | `scroll(root)` | hero glow parallaxes over the first viewport height |
+| `caret-blink` | (time) | terminal caret beside the sidebar wordmark |
+| `status-pulse` | (time) | the "البوت شغّال" dot in the desktop topbar |
+| `faq-in` | (time) | FAQ answer fades in when its `<details>` opens |
 
-Two constraints: don't scrub body copy or cards (scrubbed text fades back out as you scroll
-up, which is distracting to read against — scrubbing is for effects where being tied to
-scroll position is the actual point), and this is also why `hero-drift` targets `.wordmark`
-specifically rather than its `.reveal` parent `.hero__visual` (`docs/claude/design-and-invariants.md`'s reveal/scroll-link
-conflict rule).
+**This list shrank from five scroll-driven effects to one on 2026-08-25**, because four of
+them targeted chrome the rebuild removed: `progress-grow` and `nav-solidify` belonged to the
+old sticky nav bar (there is no read-progress line and no translucent-until-scrolled bar any
+more), and `hero-recede`/`hero-drift` scrubbed the hero copy and the `.wordmark` block as the
+hero exited — but panels are now roughly one screen and the hero no longer exits under a
+following section. `glow-drift` survives because it still has a viewport-height of scroll to
+work against. Note it composes with `hero-glow` on the same element via a two-value
+`animation-timeline: auto, scroll(root block)`.
+
+Two constraints still hold: don't scrub body copy or cards (scrubbed text fades back out as
+you scroll up, which is distracting to read against — scrubbing is for effects where being
+tied to scroll position is the actual point), and never put a scroll-linked animation on an
+element that also carries `.reveal` — they fight over `transform`
+(`docs/claude/design-and-invariants.md`).
 
 ## Brand assets and the Discord mark
 
@@ -84,15 +153,24 @@ conflict rule).
 Both marks are fully transparent outside the glyph. Don't scale past ~50px, where upscaling
 starts to show.
 
-`assets/Pics/Discord-Icon.png` (100×100, transparent) renders in the 5 places
+`assets/Pics/Discord-Icon.png` (100×100, transparent) renders in the **6** places
 `docs/claude/design-and-invariants.md` counts, all on `index.html`:
 
 | Where | Class | Size |
 | --- | --- | --- |
-| `ضيف البوت` CTA, nav | `.btn__logo` in `.btn--sm` | 16px |
-| `ضيف البوت` CTA, hero and about | `.btn__logo` | 18px |
-| `ادخل سيرفرنا` CTA, community panel | `.btn__logo` | 18px |
+| `ضيف البوت` CTA, sidebar footer (`.side__foot-invite`, desktop only) | `.btn__logo` in `.btn--sm` | 16px |
+| `ضيف البوت` CTA, phone header (`.side__invite`, phone only) | `.btn__logo` in `.btn--sm` | 16px |
+| `ضيف البوت` CTA, desktop topbar | `.btn__logo` in `.btn--sm` | 16px |
+| `ضيف البوت` CTA, hero | `.btn__logo` | 18px |
+| `ادخل سيرفرنا` CTA, community panel | `.btn__logo` in `.btn--sm` | 16px |
 | `سيرفر مساعد` community panel icon | `.community__logo` | 44px |
+
+**It was 5 before the 2026-08-25 rebuild**; the extra one is the phone-header invite.
+`.side__foot-invite` and `.side__invite` are mutually exclusive by media query, as are
+`.side__invite` and the topbar's, so a visitor sees **3 invite buttons on desktop** (sidebar,
+topbar, hero) and **2 on a phone** (header, hero) — six marks in the DOM, never six on
+screen. If you add a fourth invite, check it does not become a second one visible at the
+same width.
 
 White via `filter: brightness(0) invert(1)` on the blurple CTAs (Discord's own treatment on
 a blurple field); left at natural colour on the dark community panel, which clears 7.2:1

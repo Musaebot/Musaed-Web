@@ -12,7 +12,7 @@ names, no server IDs. That rule applies to everything you write into this repo.
 ## 1. What this is
 
 A **static public marketing site** for **مساعد (Musaed)**, an Arabic (Saudi dialect)
-moderation/automod Discord bot. Five pages. It explains the bot to server owners before they
+moderation/automod Discord bot. Four pages. It explains the bot to server owners before they
 add it.
 
 It is **not** a dashboard, and nothing on it manages anything or shows real guild data —
@@ -24,24 +24,23 @@ auth scaffolded in this repo.
 ```text
 index.html                 landing page + its inline icon sprite (22 symbols)
 404.html                   custom error page, served by Caddy - see §9
-updates.html               changelog + its own sprite (1 symbol) - unlinked, see below
 connect.html               pre-auth disclosure screen before the dashboard login - see §7
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
 google82b70d7af988f7a9.html  Google Search Console site-verification file - see below
-sitemap.xml                lists the 4 real pages (not connect.html, not 404.html) - see §7
+sitemap.xml                lists the 3 real pages (not connect.html, not 404.html) - see §7
 robots.txt                 Allow: / for everyone, points at sitemap.xml - see §7
 assets/css/styles.css      tokens, reset, shared components
-assets/css/updates.css     updates page only, loaded after styles.css
 assets/css/legal.css       connect.html + BOTH legal pages, loaded after styles.css
 assets/js/main.js          stats data, count-up, scroll reveals, nav, link guard
 assets/fonts/              self-hosted woff2 (IBM Plex Sans Arabic + Plex Mono)
 assets/Pics/               brand marks. Capital P — Linux hosts are case-sensitive
 ```
 
-Five pages, three stylesheets, one script. **Zero dependencies, zero build step.** There was
-a sixth page (`developer.html`); it was removed along with its CSS and JS. Do not resurrect
-it.
+Four pages, two stylesheets, one script. **Zero dependencies, zero build step.** There used
+to be more: `developer.html` was removed along with its CSS and JS, and do not resurrect it.
+`updates.html` (the changelog) was removed on 2026-08-25 along with `assets/css/updates.css`
+— see below.
 
 **`google82b70d7af988f7a9.html` is not a page.** It is the file Google Search Console issues
 for the HTML-file verification method: single line of plain text, no doctype, no `<html>`.
@@ -50,22 +49,24 @@ the domain, filename unchanged — for Google to accept the verification, so it 
 alongside the real pages. Nothing links to it and nothing should; it is not part of site
 navigation, the same way `404.html` isn't.
 
-**`updates.html` is unlinked, not removed.** As of 2026-08-06 the nav link (`التحديثات`)
-and its footer counterpart in the `النظام` column were both deleted from `index.html`, along
-with the now-orphaned `#i-sparkle` sprite symbol they used (22 → 21 symbols at the time; the
-sprite is back at 22 since `#i-chat-text` was added 2026-08-17, §4). The page file,
-`assets/css/updates.css`, its own sprite, and its content are all untouched and still deploy
-normally — it is simply unreachable from site navigation, only by someone who already has
-the direct `/updates.html` URL. If it ever gets relinked, restore both the nav `<a>` and the
-footer `<li>` (§6's nav-link and footer-a11y counts below assume it stays absent) and re-add
-`#i-sparkle` to the sprite.
+**`updates.html` (the changelog) was removed entirely on 2026-08-25.** It had been unlinked
+since 2026-08-06 — the nav link (`التحديثات`) and its footer counterpart in the `النظام`
+column were deleted from `index.html`, along with the `#i-sparkle` sprite symbol they used
+(22 → 21 symbols at the time; back to 22 once `#i-chat-text` was added 2026-08-17, §4) — but
+the page itself, `assets/css/updates.css`, and its own 1-symbol sprite kept deploying and
+stayed reachable at `/updates.html` for anyone with the direct URL. The owner had it deleted
+outright rather than left as a dead-but-live page: nothing linked to it, and an unlinked page
+that stays crawlable indefinitely is more a liability than a convenience. Removed alongside
+it: its `sitemap.xml` entry and its four `canonical`/`og:url`/`og:image`/`twitter:image`
+URLs (§7's hardcoded-domain count dropped from 20 to 16 accordingly). There is nothing left
+to relink — a changelog page would have to be rebuilt from scratch, including the `.upbar` /
+`.uppanel` chrome and the `--up-*` local tokens `updates.css` used to carry.
 
-**`#stats` (`مساعد بالأرقام`) is hidden, not removed — same pattern as `updates.html`, one
-level deeper.** As of 2026-08-10 the section carries a `hidden` attribute, and its nav link
-(`الأرقام`) and footer counterpart in the `الموقع` column were both deleted from
-`index.html`. Unlike `updates.html` this isn't a separate page — `#stats` lives inline on
-`index.html` itself — so unlinking the nav anchor alone would not have stopped it from
-rendering as you scroll; the `hidden` attribute is what actually does that. The markup, its
+**`#stats` (`مساعد بالأرقام`) is hidden, not removed.** As of 2026-08-10 the section carries
+a `hidden` attribute, and its nav link (`الأرقام`) and footer counterpart in the `الموقع`
+column were both deleted from `index.html`. `#stats` lives inline on `index.html` itself —
+so unlinking the nav anchor alone would not have stopped it from rendering as you scroll; the
+`hidden` attribute is what actually does that. The markup, its
 three `data-mock` stats, and `main.js`'s `initStats()` are all untouched: the count-up code
 still runs against the hidden nodes (harmless — an `IntersectionObserver` on a `display:none`
 subtree just never fires), and `#i-users` stays referenced from inside the section itself, so
@@ -292,9 +293,10 @@ duration parsing, which is the most distinctive feature and is worth keeping pro
 side 2026-08-16 and the site had never mentioned it — found by diffing the bot/dashboard
 product inventory against this repo, which is exactly the check the paragraph below this
 section's history describes. It got a `#features` bento card (icon `i-chat-text`) and a
-`#dashboard-features` row, and both seven-counts on the site moved to eight: `#features`'s
-lede (`سبعة أنظمة` → `ثمانية أنظمة`) and `updates.html`'s `أنظمة` figure (7 → 8). It has no
-slash commands at all, so it gets **no `#commands` row** — same shape as automod and agegate.
+`#dashboard-features` row, and the site's seven-count moved to eight: `#features`'s lede
+(`سبعة أنظمة` → `ثمانية أنظمة`). (`updates.html` also carried a matching `أنظمة` figure at
+the time; it no longer exists — removed 2026-08-25, above.) It has no slash commands at all,
+so it gets **no `#commands` row** — same shape as automod and agegate.
 
 **A ninth system exists on the bot side and must stay off this site.** The honeypot trap
 channel (`قناة الفخ`) is gated to a single pilot guild and is not released; it is not one of
@@ -317,20 +319,24 @@ server-configurable defaults, not promises. Do not add figures there.
 ## 5. Design locks
 
 - **Dark theme only. One accent** (`--accent`, terminal green). Never introduce a second hue.
-- **Exactly two radii**: `--r-sm` (interactive/small), `--r-md` (panels). `updates.html`
-  deliberately overrides both to zero for its terminal look — that is the one exception.
+- **Exactly two radii, no exceptions**: `--r-sm` (interactive/small), `--r-md` (panels).
+  `updates.html` used to override both to zero for its terminal look; it was removed
+  2026-08-25 (§1), so this lock is no longer qualified by anything.
 - **RTL throughout.** Use logical properties (`padding-inline`, `inset-inline-start`,
   `margin-inline-start`), never physical left/right.
 - **Never apply negative letter-spacing to Arabic.** It breaks the connected script. Tracking
   is for Latin/mono only. Arabic also needs a taller line-height than Latin.
 - **Discord blurple is scoped to `.btn--primary` only** — buttons whose destination is
   Discord. Spread it further and it stops reading as "this goes to Discord" and starts
-  reading as a second brand colour. Everything else is green: **40 `var(--accent)` usages**
-  (20 in `styles.css`, 12 in `updates.css`, 8 in `legal.css`). Measured, not counted by
-  hand — `grep -c 'var(--accent)' assets/css/*.css`. Note `var(--accent-soft)` does not
-  match that pattern and is not part of the count. The `styles.css` count grew from 16 to 20
-  on 2026-08-11: two new link styles (`.cmdgroup__note a`, `.dashfeatures__note a`), each
-  using `var(--accent)` twice (`color`, `:hover` `border-color`).
+  reading as a second brand colour. Everything else is green: **29 `var(--accent)` usages**
+  (21 in `styles.css`, 8 in `legal.css`). Measured, not counted by hand —
+  `grep -c 'var(--accent)' assets/css/*.css`. Note `var(--accent-soft)` does not match that
+  pattern and is not part of the count. `updates.css` used to contribute 12 more (total 40);
+  it was removed 2026-08-25 (§1). The `styles.css` count grew from 16 to 20 on 2026-08-11
+  (two new link styles, `.cmdgroup__note a` and `.dashfeatures__note a`, each using
+  `var(--accent)` twice — `color`, `:hover` `border-color`) and to 21 when the nav login icon
+  (§ nav, "Show the nav login icon at every width") got a default `color: var(--accent)`
+  instead of only on `:hover`.
 - The Discord mark renders in **5 places**, all on `index.html`. White via
   `filter: brightness(0) invert(1)` on blurple; natural colour on dark panels.
 - **New sprite icons must come from the compiled Phosphor source, never hand-drawn and
@@ -355,14 +361,21 @@ Each of these was found by measuring, and each looks harmless to "clean up".
 - **44px is the floor for tap targets.** Several elements reach it via `padding-block`
   cancelled by a negative margin, so the target grew without the layout moving. Tightening
   padding for looks shrinks the target.
-- **Never `display: none` a label that is a control's accessible name.** The updates back
-  link hides its text under 560px by clipping it (`clip-path: inset(50%)`), so it stays in
-  the accessibility tree. `display: none` would leave screen readers announcing an
-  unlabelled link, since the icon is `aria-hidden`.
-- **Contrast is measured against the worst case, not the average.** The updates panel is
-  half-transparent, so small text must clear 4.5:1 over the *accent glow* behind it, not over
-  the plain background. `--up-faint` and `--up-dim` look darker than necessary on plain
-  background because that is not where they have to survive.
+- **Never `display: none` a label that is a control's accessible name.** `.nav__toggle-text`
+  (the hamburger button's "القائمة" label) hides its text by clipping it
+  (`clip-path: inset(50%)`), so it stays in the accessibility tree. `display: none` would
+  leave screen readers announcing an unlabelled button, since the burger icon is
+  `aria-hidden`. The updates back link used to be the other example of this pattern; it was
+  removed with `updates.html` on 2026-08-25.
+- **Contrast has to be measured against the worst case, not the average, on any
+  half-transparent panel.** The updates panel used to be the concrete example here —
+  `--up-faint`/`--up-dim` were picked to clear 4.5:1 over the *accent glow* behind the
+  panel, not the plain background, and looked darker than necessary in isolation because
+  that was never where they had to survive. That panel is gone (`updates.html`, removed
+  2026-08-25) and no current page has a half-transparent text panel, so there's no live
+  example to point at right now — but the sticky nav (`background: rgb(8 10 9 / 0.82)`,
+  `backdrop-filter: blur(14px)`) is exactly this shape, and the principle applies the moment
+  anything adds text contrast requirements to a translucent surface again.
 - **Latin code tokens in RTL text need two things, not one.** `dir="ltr"` isolates them so
   the leading slash stays left — but `dir` also flips the block's own alignment, so
   `.cmd__name` sets `text-align: end`, which resolves against the element's *own* `ltr`
@@ -382,12 +395,8 @@ Each of these was found by measuring, and each looks harmless to "clean up".
 - **`.reveal` grids must be added to `GROUPS` in `main.js`** or their children all land at
   once instead of sequencing. Currently:
   `.bento, .cmds, .stats, .guards, .team, .about`.
-- **Consecutive `.rel__desc` paragraphs are one description.** `.rel__desc + .rel__desc`
-  zeroes the border and top padding so only the first draws a hairline.
 - **`nth-child` rules are scoped with `.bento >`** so they cannot leak into a future grid
   that happens to contain a `.card`.
-- **Do not put `.reveal` on `.rel__meta`.** It animates `transform`, and a transformed
-  ancestor traps the sticky version block inside it.
 - **Do not put a scroll-linked animation on an element that also has `.reveal`** — they fight
   over `transform`.
 - **The footer must carry every nav destination.** Without JS the phone menu button is hidden
@@ -453,13 +462,6 @@ by this and still holds: it's about per-command authorization checks against the
 member, orthogonal to what scope the bot's own application token carries. Ampersands are
 `&amp;` because it is an HTML attribute; the browser sends plain `&`.
 
-**`updates.html` has zero `data-mock`** — its single release (`1.0.0`, `أغسطس 2026`, `البداية`)
-is real, owner-supplied. Its two header figures are kept in step by hand: `إصدارات` counts
-the `.rel` blocks (**1**), `أنظمة` mirrors the systems `#features` advertises (**8** since
-2026-08-17, was 7 — §4). Nothing enforces that second one; it is a number in a second file
-that silently disagrees with the landing page the moment a system is added, which is exactly
-how it spent a day wrong. **Do not add a release you cannot date.**
-
 **Live network surface: exactly one `fetch`, and it is unreachable.** `readStats()` returns
 the local `STATS` object while `STATS_ENDPOINT` is `null`. The rate-limiting path (TTL
 throttle, 429 backoff honouring `Retry-After`, last-good fallback) is already written; wiring
@@ -468,10 +470,11 @@ a real endpoint is a one-constant change. The declaration is space-aligned, so
 
 ### The hardcoded domain
 
-`https://musaed.dev` — **20 absolute URLs, 4 per page across 5 pages**: `canonical`, `og:url`,
+`https://musaed.dev` — **16 absolute URLs, 4 per page across 4 pages**: `canonical`, `og:url`,
 `og:image`, `twitter:image`. Crawlers reject relative URLs, so it is written literally.
-(`404.html` carries none of the four and is not part of the twenty — an error page has no
-canonical address.)
+(`404.html` carries none of the four and is not part of the sixteen — an error page has no
+canonical address. This was 20 URLs across 5 pages before `updates.html` was removed
+2026-08-25, §1.)
 
 **These moved off `musaed.up.railway.app` on 2026-08-08.** That host served the site too and
 always had, so nothing was broken — which is exactly why it went unnoticed: two live hosts
@@ -524,7 +527,8 @@ the links still render fine and only fail on click. If the dashboard host ever m
 grep for the host, not for `auth/login` — the `href` carrying it now lives in `connect.html`.
 
 A domain move is **not** done when the site loads at the new address; it is done when all
-twenty URLs are updated. This has now bitten twice, in both directions: once when an old host
+sixteen URLs are updated (it was twenty before `updates.html` was removed, §1). This has now
+bitten twice, in both directions: once when an old host
 404'd and half the site still pointed at it, so social cards referenced a dead image — and
 again on 2026-08-08, when the old host kept working and nothing looked wrong at all. The first
 kind announces itself. The second does not, so grep the host after every move rather than
@@ -532,14 +536,14 @@ trusting the site to tell you.
 
 ### sitemap.xml and robots.txt
 
-`sitemap.xml` lists exactly the four real, indexable pages — `/`, `/privacy.html`,
-`/terms.html`, `/updates.html` — each with a `<lastmod>` taken from that file's last commit
-date, not invented. **Deliberately excludes two pages that otherwise look like they belong:**
+`sitemap.xml` lists exactly the three real, indexable pages — `/`, `/privacy.html`,
+`/terms.html` — each with a `<lastmod>` taken from that file's last commit date, not
+invented. **Deliberately excludes two pages that otherwise look like they belong:**
 `connect.html` (a functional pre-auth step, not content someone should land on from a search
 result) and `404.html` (an error page has no canonical address — same reasoning as the
-`canonical`/`og:url` exclusion above). `updates.html` **is** included even though it's
-unlinked from nav/footer (§1) — unlinked from navigation and hidden from search are different
-claims, and the page is still live and real.
+`canonical`/`og:url` exclusion above). `updates.html` used to be a third deliberate
+inclusion (unlinked from nav/footer but still live and real, §1) until it was removed
+outright on 2026-08-25 — its sitemap entry went with it.
 
 `robots.txt` allows everything and points at the sitemap. Both files hold absolute
 `musaed.dev` URLs but are **not** `.html`, so they are invisible to the `grep -ohE
@@ -590,9 +594,11 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   Arabic-named row, `/اختصار`, is gone — §4, §6); 1 `#dashboard-features` section with exactly
   3 `<li>`s and exactly 1 outbound link; 3 guarantee panels.
 
-**Current: 154 assertions, all passing — rerun 2026-08-17** in headless Chrome 152 against
-`python -m http.server`, covering all 5 pages × 9 widths (320, 375, 390, 412, 768, 860, 900,
-1024, 1440) plus the structure and bento-row checks above. 860 and 900 are new and were added
+**154 assertions, all passing — rerun 2026-08-17** in headless Chrome 152 against
+`python -m http.server`, covering all 5 pages *(now 4 — `updates.html` was removed
+2026-08-25, §1; this count is stale by one page and hasn't been rerun since)* × 9 widths
+(320, 375, 390, 412, 768, 860, 900, 1024, 1440) plus the structure and bento-row checks
+above. 860 and 900 are new and were added
 for a reason: 860px is where `.bento` becomes a 12-column grid, so it is the width at which
 the narrowest card is narrowest, and nothing was measuring it. **This run did not include the
 17 menu assertions** — the 375px open/close/Escape/focus behaviour is still unverified since
@@ -621,9 +627,12 @@ link from a footer link with the same label.
   elements mid-transition and makes a correct layout look like missing content. Inject
   `.reveal{opacity:1!important;transform:none!important;transition:none!important}` instead
   of waiting it out.
-- **`fullPage` screenshots clip** on pages with a `position: fixed` backdrop (`updates.html`).
-  The geometry is fine — measure `getBoundingClientRect()` before believing the image. Use
-  viewport or element screenshots there.
+- **`fullPage` screenshots used to clip** on pages with a `position: fixed` backdrop —
+  `updates.html` had one (`.upbg`), the only page that ever did. It was removed 2026-08-25
+  (§1) and no current page uses `position: fixed` for a backdrop, so this trap no longer
+  applies anywhere on the site. Kept here in case a future page reintroduces the pattern: the
+  geometry was fine even when it clipped — measure `getBoundingClientRect()` before believing
+  a `fullPage` screenshot, and prefer viewport or element screenshots on a fixed-backdrop page.
 - **Element screenshots include the sticky nav** painted across the middle. That is an
   artifact, not a defect.
 - **A section taller than the viewport will not fully reveal** from a single `scrollIntoView`.

@@ -1,15 +1,23 @@
 # Placeholders — everything still open
 
+**Servers and members went live** when `/api/public/stats` shipped on the
+dashboard (`../Musaed-Dashboard/app/routers/public.py`) — `STATS_ENDPOINT` in
+`main.js` now points at it and `#stats` is no longer `hidden`. Uptime is the
+one still open: the endpoint has no `uptime_30d` field yet (it would need a
+real history of heartbeats to compute honestly, not a snapshot), so that one
+`.stat` in `index.html` stays individually `hidden` rather than showing
+against an undefined value.
+
 | What | Where | Marker |
 | --- | --- | --- |
-| 3 statistics (servers, members, uptime) | `STATS` in `main.js` | `// placeholder`, `data-mock="true"` |
+| 1 statistic (uptime) | `STATS.uptime` in `main.js`, its `.stat` in `index.html` | `// placeholder`, `data-mock="true"` |
 | _(none — every text placeholder is filled)_ | | |
 
 ```bash
-grep -rn "data-mock" index.html               # 3 — all in #stats
+grep -rn "data-mock" index.html               # 1 — the uptime .stat only
 grep -rn "data-placeholder-link" index.html   # 0 — every link is real now
 grep -c  "oauth2/authorize" index.html        # 4 — the live invite, must be identical
-grep -n  "STATS_ENDPOINT" assets/js/main.js   # must stay null
+grep -n  "STATS_ENDPOINT" assets/js/main.js   # now the real dashboard URL
 ```
 
 **Every link on the site points somewhere real.** The footer's قانوني column was the last

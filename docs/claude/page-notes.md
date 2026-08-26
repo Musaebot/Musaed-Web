@@ -44,6 +44,37 @@ does not run it, and both URLs go in Discord's Developer Portal (Privacy Policy 
 of Service URL), so they must resolve as plain documents. Do not add `main.js` to them "for
 consistency": the scroll reveals would fade a privacy policy in.
 
+**`privacy.html`, `terms.html` and `legal.css` were redesigned on 2026-08-26** to bring them
+in line with the sidebar/tab rebuild — same tokens, same two-radius lock, still zero
+JavaScript. What changed:
+
+- `.docbar` is now `position: sticky` at every width (not just phone), with the same
+  `rgb(11 13 12 / 0.88)` + `blur(12px)` recipe as the phone `.topbar` in `styles.css`, so a
+  long legal document keeps "الرئيسية" one tap away instead of requiring a scroll back to
+  the top.
+- Both pages gained a static jump list (`<nav class="doctoc">`) between `.docmeta` and
+  `.docbody` — plain `<a href="#id">` pills to each `<h2>`, nothing else. Every `<h2>` now
+  carries an `id`; `docs/claude/implementation-reference.md`'s anchor table does not cover
+  these two pages, so there is nothing there to keep in sync. Anchor jumps clear the sticky
+  bar via `scroll-margin-top: calc(var(--bar-h) + 24px)` on `.docbody h2`.
+  `html:has(.subpage--legal) { scroll-behavior: smooth }` is scoped to these pages only,
+  gated on `prefers-reduced-motion: no-preference` — index.html's router still owns its own
+  jump animation and is untouched (see the deliberate-no-smooth-scroll comment in
+  `styles.css`).
+- Each `<h2>` gets an auto-numbered accent badge (`counter(doc-section)` in a circle) instead
+  of a bare top rule, in the same mono-numeral language as `.stat__value`. Numbering is
+  CSS-only and reflows automatically if a section is ever added, removed, or reordered — the
+  jump list's order is the only thing that has to be kept in sync by hand.
+- `.docnext`'s hover state now matches `.card:hover` (`translateY(-3px)` +
+  `var(--line-strong)` border) instead of a plain green border, for consistency with the
+  rest of the site's hover language.
+- Added a `@media (max-width: 640px)` block tightening `.docwrap` padding and the numbered
+  badge size; nothing above 640px needed a breakpoint because `.doc`'s measure was already a
+  cap, not a fixed width.
+- Net effect on `legal.css`'s `var(--accent)` count: 7 → **8** (`.docnext:hover` lost its
+  green border, the jump list's hover state and the heading badge each added one) — see
+  `docs/claude/design-and-invariants.md`.
+
 **`Musaed Site.html` in the repo root is a design source, not a page.** It is the exported
 design-canvas bundle the 2026-08-25 landing-page rebuild was implemented from: a 754KB
 single-file artifact carrying React 18 and 30 Google-hosted woff2 files base64'd into a
@@ -86,8 +117,8 @@ Removed alongside it:
 
 **No `sitemap.xml` edit was needed** — `connect.html` was deliberately never listed (a
 functional pre-auth step is not a search-result landing page), which is the one way this
-removal was cheaper than `updates.html`'s. `legal.css` still loads on both legal pages and
-is otherwise untouched.
+removal was cheaper than `updates.html`'s. `legal.css` still loads on both legal pages;
+see below for the redesign it got the next day.
 
 If a pre-auth screen is ever wanted here again, read the placeholders doc first: the reason
 this one existed was that `/auth/login` is publicly reachable, and the dashboard already

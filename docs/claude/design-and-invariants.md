@@ -12,15 +12,17 @@
   is for Latin/mono only. Arabic also needs a taller line-height than Latin.
 - **Discord blurple is scoped to `.btn--primary` only** — buttons whose destination is
   Discord. Spread it further and it stops reading as "this goes to Discord" and starts
-  reading as a second brand colour. Everything else is green: **35 `var(--accent)` usages**
-  (28 in `styles.css`, 7 in `legal.css`). Measured, not counted by hand —
+  reading as a second brand colour. Everything else is green: **36 `var(--accent)` usages**
+  (28 in `styles.css`, 8 in `legal.css`). Measured, not counted by hand —
   `grep -c 'var(--accent)' assets/css/*.css`. Note `var(--accent-soft)`,
   `var(--accent-line)` and `var(--on-accent)` do not match that pattern and are not part of
   the count. The `styles.css` figure was 21 before the 2026-08-25 rebuild; the page grew a
   tab list, filter chips, a FAQ accordion and several new link styles, all green.
   `legal.css` lost one on 2026-08-25 when `.notice` went with `connect.html`
-  (`docs/claude/page-notes.md`); `updates.css` used to contribute 12 more and was removed
-  the same day.
+  (`docs/claude/page-notes.md`), 8 → 7. The same day's legal-page redesign then swapped
+  `.docnext:hover`'s green border for `var(--line-strong)` (matching `.card:hover`) but
+  added two more — the jump-list hover state and the per-heading numbered badge — net
+  7 → 8. `updates.css` used to contribute 12 more and was removed the same day.
 - **The blurple token is `#5a63d8`, not Discord's own `#5865f2`, and that is deliberate.**
   The 2026-08-25 design mockup used `#5865f2`; the project owner chose to keep `#5a63d8`.
   White label measures **4.99:1** on it versus 4.60:1 on the brand colour — both pass AA,

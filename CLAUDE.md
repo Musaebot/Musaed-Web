@@ -57,6 +57,18 @@ to be more: `developer.html` was removed along with its CSS and JS, and do not r
 — see `docs/claude/page-notes.md` for the full removal record, and the notes on the Google
 verification file, `#stats` being hidden, and the legal pages' no-JS rule.
 
+**Next planned page: pricing.** Nothing here states a price today — `#faq`'s "مساعد مجاني؟"
+answer deliberately says only that a Pro tier exists above the free one, no numbers
+(`docs/claude/copy-accuracy.md`). Before building it, get the Free/Pro figures from
+`core/plans.py`'s `PLANS` table in the bot repo (`../Musaed`) — read it fresh rather than
+copying old numbers, since a retuned figure there moves every guild on that plan and a stale
+pricing page would misstate what a customer gets. **Also confirm with the owner first
+whether this ships alongside real self-serve billing or as a numbers-only page that routes
+to contacting the team** — `Musaed-Dashboard/CLAUDE.md`'s own "Next goal" has the same open
+question, since there is no billing anywhere in the product yet and a plan is still assigned
+by hand. Don't list Early Access as a Pro perk on this page — it grants no higher limits and
+its own copy says its features may vanish or turn paid.
+
 ---
 
 ## 2. Hard rules — do not violate

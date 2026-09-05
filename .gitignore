@@ -21,3 +21,6 @@ yarn-error.log*
 # was moved into privacy.html / terms.html; it is not the copy of record.
 TODO.md
 txt.txt
+
+
+.agents/

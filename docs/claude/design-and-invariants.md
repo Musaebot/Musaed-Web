@@ -97,6 +97,11 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   reuse it rather than reinventing it; if none ever does, it's a safe deletion candidate.
 - **A chip containing Arabic needs `.chip--ar`.** Plex Mono has no Arabic glyphs, so `--mono`
   falls back part-way through the string and opens a wide gap.
+- **`.card__title` is a class, not a tag.** The four hero teaser cards use it on `<p>` (they
+  are summaries, not sections — they duplicate the `#features` `<h3>` titles); the real
+  feature cards use it on `<h3>`. Don't add a `h2.card__title` / `.card h3` selector that
+  would break the `<p>` ones. The hero also has one `.hero__kicker` (`<p>`, the slogan above
+  the H1) — added 2026-09-05 so the H1 could carry keywords without losing the slogan.
 - **Numerals are Western (`0-9`), never Arabic-Indic (`٠-٩`).** Site-wide decision, final as
   of 2026-09-05 — every visible figure (hero facts, duration chips, uptime label, the legal
   pages) uses `8`, `24`, `30`, `21`. Do not reintroduce `٨`/`٢٤`/`٣٠`. Prose that *describes*

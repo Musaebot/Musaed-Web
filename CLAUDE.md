@@ -188,6 +188,15 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
 
 ### Shipped 2026-09-05
 
+- **On-page SEO fixes** (from the `/seo-audit`): `index.html` `<title>` is now
+  "مساعد بوت ديسكورد عربي للإشراف والحماية" (was brand-only; og/twitter titles match, the
+  legal pages' titles are unchanged). Meta description rewritten to ~150 chars with a CTA
+  (all three description tags in sync; JSON-LD `description` left as the short factual one).
+  The H1 is keyworded ("مساعد، بوت ديسكورد عربي للإشراف وحماية سيرفرك") with the old slogan
+  kept as a small green `.hero__kicker` above it. The four hero teaser cards went `<h2>` →
+  `<p class="card__title">` (they duplicated the `#features` `<h3>`s). Panel headings
+  phrase-shaped: `أنظمة مساعد`, `أوامر مساعد`, `أسعار مساعد`, `أسئلة شائعة عن مساعد` (the
+  sidebar tab labels stay short). No claims or numbers touched.
 - **AI-SEO pass.** `index.html`'s JSON-LD is now a single `@graph`: `Organization`, `WebSite`,
   `SoftwareApplication`, and a `FAQPage` mirroring the six `#faq` Q&As **word-for-word** —
   edit a FAQ answer and you edit the schema too (`docs/claude/copy-accuracy.md`). Added

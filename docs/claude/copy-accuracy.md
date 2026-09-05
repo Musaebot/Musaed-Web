@@ -243,3 +243,10 @@ The other four (Arabic-first, where settings live, settings surviving a re-add, 
 restate claims already made elsewhere on the page and were left as written. The
 settings-survival answer deliberately quotes **no retention figure** — same rule as `#trust`
 below: those are configurable defaults, not promises.
+
+**The FAQ is duplicated into JSON-LD (2026-09-05).** `index.html`'s head carries a `FAQPage`
+node inside the `@graph`, and each `Question` / `acceptedAnswer` is the visible `#faq` text
+**word-for-word** (Google requires the schema and the visible copy to match; AI answer
+engines lift the `Answer.text` directly). So every FAQ edit is now two edits: the `<details>`
+block **and** the matching `acceptedAnswer.text`. The validator in
+`docs/claude/testing-and-traps.md` should check the two stay in sync.

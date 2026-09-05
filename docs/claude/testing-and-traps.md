@@ -41,6 +41,11 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   command rows; 4 filter chips; 6 FAQ items; 9 cards in `#features`; 3 in `#trust`;
   `#dashboard-features` with exactly 3 `<li>`s and exactly 1 outbound link; every
   `.cmd__name` computes `direction: ltr` and starts with `/`, with no exceptions.
+- **Structured data** (`index.html`, added 2026-09-05): the head has exactly one
+  `<script type="application/ld+json">`; it parses; its `@graph` holds `Organization`,
+  `WebSite`, `SoftwareApplication`, `FAQPage`; the `FAQPage` has **6** questions and each
+  `Question.name` + `acceptedAnswer.text` appears **verbatim** in the visible `#faq` section
+  (whitespace-normalised). `/llms.txt` and `/pricing.txt` return 200 and are non-empty.
 - **Tab routing**: a tab click swaps the visible panel, pushes the hash, moves
   `aria-current="page"`, and updates the topbar crumb; browser Back returns to the previous
   panel; an in-page CTA (`.hero__actions a[href="#features"]`) routes through the same

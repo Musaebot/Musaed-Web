@@ -63,14 +63,23 @@ a real endpoint is a one-constant change. The declaration is space-aligned, so
 
 ## The hardcoded domain
 
-`https://musaed.dev` — **15 absolute URLs**. Four per page across the three real pages are
-the metadata quartet: `canonical`, `og:url`, `og:image`, `twitter:image`. Crawlers reject
-relative URLs, so it is written literally. (`404.html` carries none of the four and is not
-counted — an error page has no canonical address. This was 20 across 5 pages before
-`updates.html` was removed 2026-08-25 — see `docs/claude/page-notes.md`.) **`index.html`
-carries three more** as of 2026-09-05, all inside its JSON-LD `SoftwareApplication` block:
-`url`, `image` (the avatar, the only reference to `musaed-avatar.png` as an absolute URL),
-and `author.url`. A domain move has to fix those three by hand along with everything else.
+`https://musaed.dev` is written out literally in a lot of places (crawlers reject relative
+URLs), and a domain move has to change every one by hand. As of 2026-09-05, `grep -o
+'https://musaed\.dev' *.html *.txt *.xml | wc -l` is ~35, spread across:
+
+- **the three real pages' metadata quartet** — `canonical`, `og:url`, `og:image`,
+  `twitter:image` (4 each; `404.html` has none, an error page has no canonical address);
+- **`index.html`'s JSON-LD `@graph`** — every node `@id`, `url`, `logo`/`image`, and
+  `publisher` back-reference (~11, added when the single `SoftwareApplication` block became
+  a four-node graph 2026-09-05);
+- **`sitemap.xml`** (3 `<loc>`), **`robots.txt`** (the `Sitemap:` line);
+- **`llms.txt`** and **`pricing.txt`** — the AI-facing text files, which link back to the
+  site pages, the dashboard, and the invite (5 and 3 respectively).
+
+Don't trust that count to the digit — re-run the grep. The point is: a move touches `.html`,
+`.txt` **and** `.xml`, not just markup. The bot invite's `client_id=1341863717247258655`
+now appears in **`llms.txt`** as well as `index.html`; it is a public OAuth client id, not a
+secret, but keep the two copies identical.
 
 **These moved off `musaed.up.railway.app` on 2026-08-08.** That host served the site too and
 always had, so nothing was broken — which is exactly why it went unnoticed: two live hosts
@@ -86,7 +95,7 @@ one real job — reading past Cloudflare to check a CSS/JS deploy — and
 which needs no second host. Treat any surviving mention as stale.
 
 ```bash
-grep -ohE 'https://[a-z0-9.-]+' *.html | sort -u
+grep -ohE 'https://[a-z0-9.-]+' *.html *.txt *.xml | sort -u
 ```
 
 That must print exactly five hosts: the site's, `discord.gg` for the community invite
@@ -94,7 +103,8 @@ That must print exactly five hosts: the site's, `discord.gg` for the community i
 bot-invite URL and the link to Discord's own terms,
 `dashboard.musaed.dev` — the dashboard (a separate deployable, `docs/claude/dashboard.md`),
 and `schema.org` — the `@context` identifier in `index.html`'s JSON-LD, which is a spec URN
-that is never fetched and never a hyperlink, so it is not part of any domain move.
+that is never fetched and never a hyperlink, so it is not part of any domain move. (The
+glob now has to include `*.txt *.xml` — `llms.txt` and `pricing.txt` carry the domain too.)
 
 **The dashboard host appears 6 times as of 2026-09-05, all in `index.html`.** Its history is
 worth knowing, because the shape keeps changing under it:

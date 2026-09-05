@@ -49,13 +49,15 @@ as the Discord bot-invite buttons, not auth scaffolded in this repo. They pointe
 and they now link straight to the dashboard, which serves its own pre-OAuth disclosure.
 
 ```text
-index.html                 landing page: 8 tab panels + its inline icon sprite (24 symbols)
+index.html                 landing page: 8 tab panels + inline icon sprite (24 symbols) + a JSON-LD @graph in the head
 404.html                   custom error page, served by Caddy - see docs/claude/testing-and-traps.md
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
 google82b70d7af988f7a9.html  Google Search Console site-verification file - see docs/claude/page-notes.md
 sitemap.xml                lists all 3 real pages (not 404.html) - see docs/claude/placeholders-and-domain.md
 robots.txt                 Allow: / for everyone, points at sitemap.xml - see docs/claude/placeholders-and-domain.md
+llms.txt                   plain-text overview for AI systems (llmstxt.org format) - added 2026-09-05
+pricing.txt                machine-readable pricing for AI agents; MIRRORS the #pricing panel's numbers - added 2026-09-05
 assets/css/styles.css      tokens, reset, shared components
 assets/css/legal.css       BOTH legal pages, loaded after styles.css
 assets/js/main.js          tab router, command filter, versus switch, scroll reveals, stats data + count-up, link guard
@@ -186,6 +188,15 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
 
 ### Shipped 2026-09-05
 
+- **AI-SEO pass.** `index.html`'s JSON-LD is now a single `@graph`: `Organization`, `WebSite`,
+  `SoftwareApplication`, and a `FAQPage` mirroring the six `#faq` Q&As **word-for-word** —
+  edit a FAQ answer and you edit the schema too (`docs/claude/copy-accuracy.md`). Added
+  `/llms.txt` (llmstxt.org overview) and `/pricing.txt` (machine-readable pricing that
+  mirrors the `#pricing` panel's numbers). A visible "آخر تحديث `<time>`" line in the footer
+  — **bump its date on any real content change to the landing page.** `robots.txt` already
+  allows every AI crawler (`* / Allow: /`), no change needed. Still open (Tier 3): a real
+  `<table>` for `#why-musaed` (blocked by the no-`<table>` design lock), and a fuller
+  `/pricing.txt` once a numeric Pro price exists.
 - JSON-LD `SoftwareApplication` on `index.html` — Arabic name/description,
   `isAccessibleForFree`, five-item `featureList`, no ratings or install counts. Adds three
   `musaed.dev` absolute URLs (`docs/claude/placeholders-and-domain.md`).

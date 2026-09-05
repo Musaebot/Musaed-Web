@@ -58,9 +58,9 @@ sitemap.xml                lists all 3 real pages (not 404.html) - see docs/clau
 robots.txt                 Allow: / for everyone, points at sitemap.xml - see docs/claude/placeholders-and-domain.md
 llms.txt                   plain-text overview for AI systems (llmstxt.org format) - added 2026-09-05
 pricing.txt                machine-readable pricing for AI agents; MIRRORS the #pricing panel's numbers - added 2026-09-05
-assets/css/styles.css      tokens, reset, shared components
-assets/css/legal.css       BOTH legal pages, loaded after styles.css
-assets/js/main.js          tab router, command filter, versus switch, scroll reveals, stats data + count-up, link guard
+assets/css/styles.css      tokens, reset, shared components. Linked as ?v=N - bump on change, see docs/claude/git-and-deploy.md
+assets/css/legal.css       BOTH legal pages, loaded after styles.css. Also ?v=N
+assets/js/main.js          tab router (+ per-tab <title>), command filter, versus switch, scroll reveals, stats data + count-up, link guard. Linked as ?v=N
 assets/fonts/              self-hosted woff2 (IBM Plex Sans Arabic + Plex Mono)
 assets/Pics/               brand marks. Capital P — Linux hosts are case-sensitive
 ```
@@ -185,6 +185,14 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
   ("تحقق أساسي") and `السعر` ("مجاني محدود؛ ميزات كثيرة مدفوعة") arguably understate how thin
   MEE6's free tier is after its paywall creep. The owner's 2026-09-05 pass did **not** touch
   these — they are claims about another product and the current wording is defensible.
+
+### Shipped 2026-09-06
+
+- **Per-tab `<title>`** — `#top` keeps the full keyworded title (what crawlers see); every
+  other panel shows `"<tab label> | مساعد"` (`initTabs`/`activate` in `main.js`).
+- **Asset cache-busting** — `styles.css` / `legal.css` / `main.js` are now linked as
+  `?v=N`. Bump `N` on every CSS/JS change or the CDN serves the old file for up to 4h after
+  a deploy. See `docs/claude/git-and-deploy.md`. Currently `v=1`.
 
 ### Shipped 2026-09-05
 

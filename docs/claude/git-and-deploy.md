@@ -9,6 +9,13 @@ and any affected `docs/claude/*.md` first — same commit, or the one right befo
 Keep commit messages plain: one line saying what changed, in terms anyone could follow, no
 jargon and no `Co-Authored-By` trailer. Split unrelated changes into separate commits.
 
+**If you touched `assets/css/*` or `assets/js/*`, bump the `?v=N` on every `<link>` / `<script>`
+that points at it** — `styles.css?v=N` in all four HTML pages, `legal.css?v=N` in the two
+legal pages, `main.js?v=N` in `index.html`. The HTML is never CDN-cached, so a new `?v=`
+makes Cloudflare fetch the asset fresh on the next load; without it, users get the old
+CSS/JS for up to 4 hours (`max-age=14400`) after a deploy and a redeploy does not purge it.
+One counter, bumped together. (Fonts are not versioned — they don't change without a rename.)
+
 Before pushing, scan the tree — not just the diff:
 
 ```bash
@@ -25,12 +32,13 @@ After a push, verify against the **remote**, not just locally:
 git ls-remote origin refs/heads/main    # must equal git rev-parse HEAD
 ```
 
-**Then verify the live deploy on `musaed.dev` with a cache-busting query string if the change
-touched CSS or JS** — `docs/claude/testing-and-traps.md` has the exact commands. Cloudflare caches those for up to 4 hours on
-the branded domain and a redeploy doesn't purge it, so the plain URL can look unchanged (or
-half-changed) right after a push that fully succeeded. Check `last-modified` against the
-deploy time, not just whether the page renders. Plain `musaed.dev` is fine for HTML-only
-changes, which are never cached.
+**Then verify the live deploy on `musaed.dev`.** For HTML-only changes the plain URL is fine
+(HTML is never cached). For CSS/JS, check the versioned URL you just bumped
+(`musaed.dev/assets/css/styles.css?v=N`) returns the new file — that is the URL the new HTML
+actually requests. The *un*-versioned `styles.css` will stay stale in Cloudflare for up to 4
+hours and that is now expected and harmless. `docs/claude/testing-and-traps.md` has the
+commands. If you forgot to bump `?v=` and need it live now, the only fix is a Cloudflare
+dashboard purge (Caching → Purge) — a redeploy will not do it.
 
 Also confirm the push actually triggered a Railway deploy — it doesn't always. `list-deployments`
 should show a fresh entry with `reason: "deploy"` and the new commit hash within a few

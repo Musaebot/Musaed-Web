@@ -164,13 +164,18 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
 
 ### Open — the agent can do these
 
-1. **Brand voice, rest of the site.** This is the main open task. `product-marketing.md`
-   calls for "friendly, warm, made for your people". `#why-musaed` was brought into that
-   voice 2026-09-05; the hero, `#features`, `#trust`, and FAQ still lean deadpan. Move the
-   copy toward the warm voice; keep the legal pages neutral.
-2. **Arabic directory research.** Web-search for the real names of Arabic Discord-bot
-   directories and listing servers, fill the `RESEARCH` row in `directory-tracker.csv`, then
-   draft each listing from `directory-listings-copy.md`. Submitting stays the owner's job.
+1. **Brand voice, rest of the site.** `product-marketing.md` calls for "friendly, warm,
+   made for your people". `#why-musaed` was brought into that voice 2026-09-05. A first
+   light pass on the hero / `#about` / `#features` / `#trust` ledes and two FAQ answers is
+   sitting on the **`brand-voice-pass` branch** awaiting owner review — merge or delete it,
+   don't redo it blind. If it lands, a deeper pass on the card bodies and the
+   `#commands`/`#dashboard-features` prose is the next step. Legal pages stay neutral.
+2. ~~Arabic directory research.~~ **Done 2026-09-05.** Findings in `directory-tracker.csv`
+   (now 27 rows) and `product-marketing.md` v4: no standalone Arabic bot-directory sites
+   exist; Arabic discovery = the `arabic`/`arabic-language` tags on the big lists, Arabic
+   tech-blog roundups (مجنون كمبيوتر, سماعة تك, Khamsat), Arabic YouTubers, and Disboard
+   bot-list servers. "Saudi bot" ≈ صقر بوت / SaqrBot. Submitting the listings is still the
+   owner's job.
 
 ### Leave alone unless asked
 

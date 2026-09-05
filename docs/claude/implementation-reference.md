@@ -53,6 +53,11 @@ purpose; that's the section to edit if it should read as a solo maintainer.
 - **A delegated document-level handler catches every other `a[href^="#"]`** — the hero CTA,
   the brand mark, footer links. Without it an in-page link could leave the page showing a
   panel the tabs disagree with.
+- **`activate()` also sets `document.title`** (added 2026-09-05). `#top` keeps the full
+  keyworded `<title>` (captured once as `baseTitle` — this is what crawlers see); every other
+  panel becomes `"<tab label> | مساعد"` so the browser tab reflects the section instead of
+  repeating the pitch. Same chokepoint as the `[data-crumb]` update, so back/forward and
+  pasted URLs are covered.
 - **`scroll-behavior: smooth` is deliberately NOT set on `html`.** A global smooth scroll
   turns the browser's own fragment jump on a cold `/#faq` load into a ~150ms animation that
   *starts after* the router has already reset the scroll position — and wins, landing the

@@ -164,12 +164,12 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
 
 ### Open — the agent can do these
 
-1. **Brand voice, rest of the site.** `product-marketing.md` calls for "friendly, warm,
-   made for your people". `#why-musaed` was brought into that voice 2026-09-05. A first
-   light pass on the hero / `#about` / `#features` / `#trust` ledes and two FAQ answers is
-   sitting on the **`brand-voice-pass` branch** awaiting owner review — merge or delete it,
-   don't redo it blind. If it lands, a deeper pass on the card bodies and the
-   `#commands`/`#dashboard-features` prose is the next step. Legal pages stay neutral.
+1. **Brand voice — deeper pass still open.** `product-marketing.md` calls for "friendly,
+   warm, made for your people". `#why-musaed` (2026-09-05) and a first light pass on the
+   hero / `#about` / `#features` / `#trust` ledes + two FAQ answers (merged 2026-09-05) are
+   done. Still deadpan: the `#features`/`#trust` **card bodies**, the `#commands` and
+   `#dashboard-features` prose, most FAQ answers. Warm the framing, leave the spec concrete
+   (the `#why-musaed` principle); legal pages stay neutral.
 2. ~~Arabic directory research.~~ **Done 2026-09-05.** Findings in `directory-tracker.csv`
    (now 27 rows) and `product-marketing.md` v4: no standalone Arabic bot-directory sites
    exist; Arabic discovery = the `arabic`/`arabic-language` tags on the big lists, Arabic
@@ -193,6 +193,8 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
   pulled from the vendored woff2, no external font `@import`). Matches the PNG mark; not
   wired into any page. Regenerate with `fonttools` if the glyph needs adjusting.
 - `sitemap.xml` `lastmod` dates refreshed; community invite link updated on every page.
+- First warm-voice pass merged: hero sub, `#about` heading, `#features`/`#trust` ledes,
+  two FAQ answers. Ledes and framing only; card bodies left concrete.
 - Western numerals site-wide; Dyno verdict de-contradicted against its own table; the
   `#why-musaed` switch got its `vs-in` fade.
 - The `#pricing` and `#why-musaed` panels were committed (they had been sitting uncommitted

@@ -153,6 +153,67 @@ this page's point of view (see `#dashboard-features`, above). Don't use "it's no
 **`#trust` quotes no numbers** for retention windows or automod thresholds — those are
 server-configurable defaults, not promises. Do not add figures there.
 
+## `#why-musaed` — the comparison panel, new 2026-09-05
+
+`#why-musaed` ("ليش مساعد؟") sits after `#faq` and is a third place claims can go stale, and
+the first that makes claims about **other people's bots**. A switcher (`.filters` style,
+`initVersus()`) toggles one `.vs` block at a time: MEE6, Dyno.
+
+- **Every "مساعد" cell is bound by the same rule as the rest of the site** — true to the
+  bot, no invented numbers. The panel deliberately states "8 أنظمة" and "كل الأنظمة مجانية"
+  and the same Free/Pro framing as `#pricing`, nothing sharper.
+- **Every competitor cell must be fair and defensible.** MEE6 and Dyno rows stick to
+  well-known, stable facts (English-first, MEE6's levelling, Dyno's configurable automod,
+  both paywall a Premium tier). A `vs__foot` line dates the whole thing ("سبتمبر 2026")
+  and points readers to each bot's own site. Do not tighten a hedge into a claim without
+  checking the competitor's current feature set — comparison pages that overreach get
+  cross-referenced and discounted by AI answer engines, and it's just bad faith.
+- **Fact-check pass 2026-09-05 (web-verified).** The support-tickets row originally said
+  "غير مدمجة" for **both** competitors — wrong both ways. Dyno shipped a **free** Tickets
+  module in May 2026 (panels, private channels, intake forms, transcripts; Premium only adds
+  deeper customization) — now "نظام مدمج ومجاني (من 2026)؛ برو يوسّع التخصيص". MEE6's
+  Ticketing plugin exists but its free tier is stripped bare (0 embeds on panel/intro, no
+  transcripts of deleted tickets per MEE6's own free-vs-premium page) — now "الإضافة موجودة،
+  بس مميزاتها مقفولة لبرو". Also: MEE6's language cell was "إنجليزي؛ ترجمة جزئية" — no Arabic
+  locale could be confirmed (MEE6 documents EN/FR/ES/DE, LTR dashboard), changed to "إنجليزي
+  (بدون عربي)" and the Dyno cell matched. Dyno/MEE6 duration input confirmed English-only
+  (`1w2d3h4m` / `10m`); Dyno automod confirmed rule-based and free.
+- **MEE6 paywall creep, confirmed by owner screenshots 2026-09-05.** The MEE6 dashboard shows
+  **Levels**, **Moderator**, **Automatic moderation**, **Reaction Roles**, **Welcome Channel**
+  and **Automations** all behind the "To use this feature, upgrade your plan" wall. Four MEE6
+  cells were corrected as a result:
+  - اللغة الأساسية: "إنجليزي؛ ترجمة جزئية" → "إنجليزي (بدون عربي)" (no Arabic locale found)
+  - الإشراف والسجل: "نعم" → "ضمن باقة برو" (Moderator plugin gated)
+  - الحماية التلقائية: "نعم" → "ضمن باقة برو" (Automatic moderation gated — screenshot)
+  - مستويات وXP، رتب تفاعل، إشعارات: "نعم — من أبرز مميزاته" → "موجودة، لكن كلها صارت لبرو"
+  - تذاكر الدعم: "غير مدمجة" → "الإضافة موجودة، بس مميزاتها مقفولة لبرو"
+
+  Still not tightened (owner's 2026-09-05 decision pass explicitly left these alone):
+  **التحقق عند الدخول** still says "تحقق أساسي" — but Reaction Roles (the free
+  verification-gate path) is now Premium too and captcha is limited-rollout, so this may
+  also belong behind "ضمن باقة برو". And **السعر** ("مجاني محدود…") arguably understates how
+  thin MEE6's free tier is (MEE6 Premium is ~$12/server/mo). Current wording is defensible;
+  leave both until the owner asks.
+- **Dyno verdict paragraph fixed 2026-09-05.** It used to imply مساعد was distinctive for
+  having built-in tickets ("معاها التذاكر … جاهزة من غير إضافات"), which contradicts the
+  tickets row saying Dyno *also* ships a free built-in system. Now: "ونظام تذاكر مدمج ومجاني
+  مثل Dyno بالضبط. الفرق مو في التذاكر، الفرق إنه بلهجتك…" — the differentiator is language
+  and Arabic customization, not tickets. Same dialect and warm tone as the rest of the panel.
+- **Full-panel voice/consistency review 2026-09-05.** After the fact-check and verdict fix,
+  every cell was re-checked against both verdicts: no other leftover sentence contradicts a
+  table, and the lede / both verdicts / `vs__foot` are one consistent warm Saudi-dialect
+  register.
+- **Numerals here are Western**, in step with the site-wide 2026-09-05 conversion — the
+  duration cells read "«30 يوم»", not "«٣٠ يوم»".
+- **A Saudi bot block was drafted then pulled 2026-09-05** — no reliable feature data for it,
+  and a comparison column full of "راجع موقعه" helps nobody. If an Arabic rival is added
+  back, it needs a real, checkable feature set first, same bar as the MEE6/Dyno rows.
+- **The tone is deliberately warm**, not a dry spec sheet — the verdict paragraphs open by
+  granting the other bot its strengths ("بوت كبير وشامل", "شاطر في الأوتومود") before drawing
+  the line. The tables stay neutral and factual; the warmth lives in the prose around them.
+- **No competitor names in `#commands`, `#features`, or the counts** — the comparison lives
+  in its own panel and nowhere else.
+
 ## The FAQ — new on 2026-08-25, and the two claims that were checked
 
 `#faq` (أسئلة شائعة) is a six-item `<details>` accordion added in the design rebuild. It is

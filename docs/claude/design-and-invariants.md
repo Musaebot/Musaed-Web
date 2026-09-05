@@ -12,12 +12,19 @@
   is for Latin/mono only. Arabic also needs a taller line-height than Latin.
 - **Discord blurple is scoped to `.btn--primary` only** — buttons whose destination is
   Discord. Spread it further and it stops reading as "this goes to Discord" and starts
-  reading as a second brand colour. Everything else is green: **36 `var(--accent)` usages**
-  (28 in `styles.css`, 8 in `legal.css`). Measured, not counted by hand —
+  reading as a second brand colour. Everything else is green: **46 `var(--accent)` usages**
+  (38 in `styles.css`, 8 in `legal.css`). Measured, not counted by hand —
   `grep -c 'var(--accent)' assets/css/*.css`. Note `var(--accent-soft)`,
   `var(--accent-line)` and `var(--on-accent)` do not match that pattern and are not part of
   the count. The `styles.css` figure was 21 before the 2026-08-25 rebuild; the page grew a
-  tab list, filter chips, a FAQ accordion and several new link styles, all green.
+  tab list, filter chips, a FAQ accordion and several new link styles, all green. It moved
+  28 → 34 on 2026-09-04 when the `#pricing` panel shipped (`.plan--pro`, `.plan__badge`,
+  `.plan__delta`, `.compare__col--pro` and friends), then 34 → 37 on 2026-09-05: `.plan__note a`
+  gained a link style (+2) and `.btn--accent` was (re)added for the Pro upgrade CTA once it
+  became a dashboard link rather than a Discord one (+1). An earlier draft of that CTA on
+  2026-09-04 had `.btn--accent` added then removed when the CTA was briefly a Discord link
+  (`.btn--primary`); it is back now that the destination is `dashboard.musaed.dev/pricing/get-pro`.
+  37 → 38 on 2026-09-05 when the `#why-musaed` panel added `.vs .compare__head .compare__col--pro`.
   `legal.css` lost one on 2026-08-25 when `.notice` went with `connect.html`
   (`docs/claude/page-notes.md`), 8 → 7. The same day's legal-page redesign then swapped
   `.docnext:hover`'s green border for `var(--line-strong)` (matching `.card:hover`) but
@@ -90,10 +97,16 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   reuse it rather than reinventing it; if none ever does, it's a safe deletion candidate.
 - **A chip containing Arabic needs `.chip--ar`.** Plex Mono has no Arabic glyphs, so `--mono`
   falls back part-way through the string and opens a wide gap.
+- **Numerals are Western (`0-9`), never Arabic-Indic (`٠-٩`).** Site-wide decision, final as
+  of 2026-09-05 — every visible figure (hero facts, duration chips, uptime label, the legal
+  pages) uses `8`, `24`, `30`, `21`. Do not reintroduce `٨`/`٢٤`/`٣٠`. Prose that *describes*
+  the bot accepting either digit form as duration input is fine — that's a bot capability,
+  not a numeral-style choice.
 - **A `.reveal` grid needs `data-stagger` on its container** or its children all land at
   once instead of sequencing. `main.js` reads the attribute rather than a hardcoded selector
   list — the old `GROUPS` constant (`.bento, .cmds, .stats, .guards, .team, .about`) is gone,
-  so adding a grid no longer means editing JS. There are **4** `data-stagger` containers.
+  so adding a grid no longer means editing JS. There are **5** `data-stagger` containers as
+  of 2026-09-04 (`.plans` on the new `#pricing` panel is the fifth; it was 4 before).
 - **Reveals inside a hidden panel need re-observing when the panel opens.** A panel starts
   under `hidden`, where an observed element never intersects. `refreshReveals()` unobserves
   and re-observes that panel's not-yet-revealed nodes on activation, forcing a fresh
@@ -111,7 +124,8 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   convert them to buttons: a button with no JS is dead, and these are the whole navigation.
 - **The footer must carry every tab destination.** Without JS the phone menu button is hidden
   (a control that cannot work is worse than none), so `.foot__nav` is the only navigation a
-  no-JS phone gets. It holds all six. Add a tab and you add a footer link, or don't add it.
+  no-JS phone gets. It holds all eight (six until `#pricing` joined 2026-09-04, seven until
+  `#why-musaed` joined 2026-09-05). Add a tab and you add a footer link, or don't add it.
 
 ### Measured width limits
 

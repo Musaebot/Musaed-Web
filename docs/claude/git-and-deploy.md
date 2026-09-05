@@ -2,6 +2,13 @@
 
 Work happens on **`main`**, which is what Railway deploys. Commit and push only when asked.
 
+**Before you commit, `CLAUDE.md` has to be current** (hard rule 8). If the change adds or
+removes a panel, moves a number, changes a rule, or opens/closes a goal, update `CLAUDE.md`
+and any affected `docs/claude/*.md` first — same commit, or the one right before.
+
+Keep commit messages plain: one line saying what changed, in terms anyone could follow, no
+jargon and no `Co-Authored-By` trailer. Split unrelated changes into separate commits.
+
 Before pushing, scan the tree — not just the diff:
 
 ```bash

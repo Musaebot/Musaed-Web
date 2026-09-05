@@ -6,9 +6,21 @@ run it) and is not a technical reference — don't look there for history, reaso
 implementation detail.
 
 **The landing page was rebuilt on 2026-08-25** from a supplied design mockup: it is now a
-sidebar + six tab panels rather than one long scrolling page. Same content, same URLs — the
+sidebar + tab panels rather than one long scrolling page. Same content, same URLs — the
 tabs are real anchors and every old `#features`/`#commands`/`#trust`/`#about`/`#about-us`
 deep link still resolves. See `docs/claude/implementation-reference.md` for the panel map.
+**Eight panels as of 2026-09-05.** `#pricing` joined the original six on 2026-09-04 (Free/Pro
+numbers from `core/plans.py`, still **no numeric Pro price**; the Pro CTA points at the
+dashboard's `/pricing/get-pro` upgrade route as of 2026-09-05, replacing an earlier
+"contact the team" Discord link). `#why-musaed` ("ليش مساعد؟") joined 2026-09-05 — a
+competitor-comparison panel sitting **after `#faq`** (late-funnel), with a `.filters`-style
+switcher (MEE6 / Dyno), driven by `initVersus()` in `main.js` — the switch replays a CSS
+cascade-in (`vs-in` keyframe in `styles.css`, added 2026-09-05; opacity/transform only,
+flattened by the reduced-motion block). It states claims about **other** bots, so it
+carries the same accuracy burden as `#commands` — see `docs/claude/copy-accuracy.md`.
+Several counts in `docs/claude/testing-and-traps.md` were pinned at six and are now stale
+until the measurement suite is rerun — read that file's own note before trusting a number
+in it.
 
 **This file was split on 2026-08-25 into this slim root plus `docs/claude/*.md` files.**
 Root keeps only identity, the hard rules, and the "Where to find things" table below.
@@ -25,8 +37,8 @@ names, no server IDs. That rule applies to everything you write into this repo.
 ## 1. What this is
 
 A **static public marketing site** for **مساعد (Musaed)**, an Arabic (Saudi dialect)
-moderation/automod Discord bot. Three pages. It explains the bot to server owners before they
-add it.
+moderation/automod Discord bot. Three pages, one of them an eight-panel tabbed page. It
+explains the bot to server owners before they add it.
 
 It is **not** a dashboard, and nothing on it manages anything or shows real guild data —
 this repo itself has no login state, no account, no backend. The two «لوحة التحكم» buttons
@@ -37,7 +49,7 @@ as the Discord bot-invite buttons, not auth scaffolded in this repo. They pointe
 and they now link straight to the dashboard, which serves its own pre-OAuth disclosure.
 
 ```text
-index.html                 landing page: 6 tab panels + its inline icon sprite (22 symbols)
+index.html                 landing page: 8 tab panels + its inline icon sprite (24 symbols)
 404.html                   custom error page, served by Caddy - see docs/claude/testing-and-traps.md
 privacy.html               privacy policy   } same layout, one shared
 terms.html                 terms of use     } stylesheet, NO JavaScript
@@ -46,7 +58,7 @@ sitemap.xml                lists all 3 real pages (not 404.html) - see docs/clau
 robots.txt                 Allow: / for everyone, points at sitemap.xml - see docs/claude/placeholders-and-domain.md
 assets/css/styles.css      tokens, reset, shared components
 assets/css/legal.css       BOTH legal pages, loaded after styles.css
-assets/js/main.js          tab router, command filter, scroll reveals, stats data + count-up, link guard
+assets/js/main.js          tab router, command filter, versus switch, scroll reveals, stats data + count-up, link guard
 assets/fonts/              self-hosted woff2 (IBM Plex Sans Arabic + Plex Mono)
 assets/Pics/               brand marks. Capital P — Linux hosts are case-sensitive
 ```
@@ -57,17 +69,18 @@ to be more: `developer.html` was removed along with its CSS and JS, and do not r
 — see `docs/claude/page-notes.md` for the full removal record, and the notes on the Google
 verification file, `#stats` being hidden, and the legal pages' no-JS rule.
 
-**Next planned page: pricing.** Nothing here states a price today — `#faq`'s "مساعد مجاني؟"
-answer deliberately says only that a Pro tier exists above the free one, no numbers
-(`docs/claude/copy-accuracy.md`). Before building it, get the Free/Pro figures from
-`core/plans.py`'s `PLANS` table in the bot repo (`../Musaed`) — read it fresh rather than
-copying old numbers, since a retuned figure there moves every guild on that plan and a stale
-pricing page would misstate what a customer gets. **Also confirm with the owner first
-whether this ships alongside real self-serve billing or as a numbers-only page that routes
-to contacting the team** — `Musaed-Dashboard/CLAUDE.md`'s own "Next goal" has the same open
-question, since there is no billing anywhere in the product yet and a plan is still assigned
-by hand. Don't list Early Access as a Pro perk on this page — it grants no higher limits and
-its own copy says its features may vanish or turn paid.
+**`#pricing` shipped 2026-09-04** — a seventh tab, not a new page (see the two paragraphs
+above). It states the real Free/Pro figures (pulled from `core/plans.py`'s `PLANS` table in
+the bot repo — re-read that fresh before ever touching a number on this panel, a retuned
+figure there moves every guild on that plan and a stale copy here would misstate what a
+customer gets) and still shows **no numeric Pro price** — `.plan__price--pending` renders
+"يُعلن قريبًا" and the panel carries no figure. The Pro CTA (`.btn--accent`, "ترقّى لبرو")
+points at `https://dashboard.musaed.dev/pricing/get-pro` as of 2026-09-05 — a first-party
+outbound link to the dashboard's own upgrade flow, same category as the «لوحة التحكم» links,
+not billing scaffolded here. It replaced an earlier Discord "contact the team" link from when
+no upgrade route existed. Whoever sets a real price fills in `.plan__price--pending` then.
+Early Access is deliberately not listed as a Pro perk — it grants no higher limits and its
+own copy says its features may vanish or turn paid.
 
 ---
 
@@ -94,6 +107,11 @@ because nothing below is about it. Do not weaken a rule here to make dashboard w
 6. **All user-facing copy is Saudi-dialect Arabic. All code comments and placeholder markers
    are English.**
 7. **Every invented number is marked in-code** so it is trivial to find and replace.
+8. **Keep `CLAUDE.md` current with every commit.** Any change that adds or removes a panel,
+   moves a number, changes a rule, or opens or closes a goal updates this file (and any
+   affected `docs/claude/*.md`) as part of the same batch of commits — same commit or an
+   adjacent one, never left for "later". Someone reading only this file should never be
+   behind the code.
 
 If live numbers are ever needed, they must come from a **separate, purpose-built public
 aggregate endpoint** — never per-server rows, never member identities. The seam already
@@ -111,7 +129,8 @@ exists; see `docs/claude/placeholders-and-domain.md`.
 | touch CSS/design tokens, or need the "don't accidentally break this" checklist | `docs/claude/design-and-invariants.md` |
 | check the stats placeholder, the invite URL, or do a domain move | `docs/claude/placeholders-and-domain.md` |
 | test/verify a change, or want the list of known testing/deploy gotchas | `docs/claude/testing-and-traps.md` |
-| commit and push, or verify a deploy actually went live | `docs/claude/git-and-deploy.md` |
+| commit and push (and the commit checklist / CLAUDE.md-first rule), or verify a deploy actually went live | `docs/claude/git-and-deploy.md` |
+| pick up open work, plan growth/distribution, or check what's still owed | `## 4. Next goals` below + `.agents/*` (gitignored, local-only) |
 | need the history behind the Google-verification file, the `updates.html` removal, `#stats` being hidden, or why the legal pages load no JS | `docs/claude/page-notes.md` |
 
 ---
@@ -128,3 +147,70 @@ move on — do not narrate the mistake.
 placeholder. If you need a count, measure it; if you cannot, mark it.
 
 Never truncate code with placeholders or `// ... rest unchanged`.
+
+---
+
+## 4. Next goals — what to pick up
+
+Ordered roughly by priority. Open as of 2026-09-05. The growth work is tracked in `.agents/`
+(gitignored, **local-only — a fresh clone won't have these files**; ask the owner for them
+if missing): `directory-tracker.csv` (18 listing targets; **top.gg is live as of ~2026-08-29**,
+the rest not submitted), `directory-listings-copy.md` (Arabic-first listing copy,
+paste-ready), `product-marketing.md` (positioning, voice, goals).
+
+**Primary objective (owner's, from `product-marketing.md`): adoption, not revenue.**
+Target is 50 servers using Musaed; the current count lives in the gitignored docs, not here.
+The site's job in that funnel is the "ضيف البوت" conversion and the directory long tail.
+
+### Open — the agent can do these
+
+1. **Brand voice, rest of the site.** This is the main open task. `product-marketing.md`
+   calls for "friendly, warm, made for your people". `#why-musaed` was brought into that
+   voice 2026-09-05; the hero, `#features`, `#trust`, and FAQ still lean deadpan. Move the
+   copy toward the warm voice; keep the legal pages neutral.
+2. **Arabic directory research.** Web-search for the real names of Arabic Discord-bot
+   directories and listing servers, fill the `RESEARCH` row in `directory-tracker.csv`, then
+   draft each listing from `directory-listings-copy.md`. Submitting stays the owner's job.
+
+### Leave alone unless asked
+
+- **`#why-musaed` MEE6 rows** (`docs/claude/copy-accuracy.md`): `التحقق عند الدخول`
+  ("تحقق أساسي") and `السعر` ("مجاني محدود؛ ميزات كثيرة مدفوعة") arguably understate how thin
+  MEE6's free tier is after its paywall creep. The owner's 2026-09-05 pass did **not** touch
+  these — they are claims about another product and the current wording is defensible.
+
+### Shipped 2026-09-05
+
+- JSON-LD `SoftwareApplication` on `index.html` — Arabic name/description,
+  `isAccessibleForFree`, five-item `featureList`, no ratings or install counts. Adds three
+  `musaed.dev` absolute URLs (`docs/claude/placeholders-and-domain.md`).
+- `assets/Pics/musaed-avatar.svg` — self-contained outlined «م» (IBM Plex Sans Arabic 700,
+  pulled from the vendored woff2, no external font `@import`). Matches the PNG mark; not
+  wired into any page. Regenerate with `fonttools` if the glyph needs adjusting.
+- `sitemap.xml` `lastmod` dates refreshed; community invite link updated on every page.
+- Western numerals site-wide; Dyno verdict de-contradicted against its own table; the
+  `#why-musaed` switch got its `vs-in` fade.
+- The `#pricing` and `#why-musaed` panels were committed (they had been sitting uncommitted
+  in the working tree since early September).
+
+### Settled — do not reopen
+
+- **No standalone comparison pages.** The owner rejected `/alternatives/*.html` on 2026-09-05.
+  The MEE6/Dyno comparison stays as the single `#why-musaed` tab. A draft `alternatives/mee6.html`
+  was built and deleted; do not resurrect it. The SEO tradeoff (a hash tab won't rank for
+  "بديل MEE6") is known and accepted.
+- **Numerals are Western (0-9) everywhere.** Converted site-wide 2026-09-05 — hero facts,
+  duration chips, uptime label, `privacy.html`. This is final; do not reintroduce
+  Arabic-Indic digits. (Copy may still *describe* the bot accepting both as duration input —
+  that is a real bot capability, not a site-chrome choice.)
+- **The systems count is 8**, stated as `8 أنظمة` (hero) and `ثمانية أنظمة` (`#features` lede).
+  `#features` has 9 cards on purpose: 8 systems + the "أوامر واضحة" meta-card. The bot's 9th
+  system (honeypot trap channel, `قناة الفخ`) **stays off this site** — see `docs/claude/copy-accuracy.md`.
+
+### Not the agent's to do
+
+Directory submissions themselves (discordbotlist, disboard, …) need the bot's Discord login
+and manual form work — owner tasks. **top.gg is already done** (live ~2026-08-29).
+`discord.bots.gg` is blocked until Discord verification (~100 servers). Product Hunt is
+deferred. Arabic directories need a name-research pass first. See `directory-tracker.csv`
+for the per-site state.

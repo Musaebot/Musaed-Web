@@ -17,6 +17,18 @@ this repo**:
 npx @puppeteer/browsers install chrome-headless-shell@stable
 ```
 
+**Two panels shipped after this suite last ran — `#pricing` (2026-09-04, seventh tab) and
+`#why-musaed` (2026-09-05, eighth). Every count below that involves the tab/panel/footer/menu
+structure is now stale by two, not one; the inline "(was N)" notes were written for the
+`#pricing` step only.** What actually happened instead: both panels were checked by hand in a
+real browser (widths, RTL, no horizontal scroll, console clean, tap targets by eye) — not a
+substitute for rerunning the suite, so treat the numbers below as "what to update the
+recreated suite to," not as a passing result. Current true values: **24** sprite symbols,
+**8 tabs and 8 panels** (tab/panel order: top, features, commands, pricing, trust, faq,
+why-musaed, about-us), **8** `.foot__nav` hrefs, **two** `.filters` groups (command chips +
+the `#why-musaed` bot switcher), and the `#why-musaed` panel holds **2** `.vs` blocks with
+exactly one visible once `initVersus()` runs (both rendered with JS off).
+
 The suite that currently passes lives outside the repo. Recreate it to assert:
 
 - **Per page × width** (320, 375, 390, 412, 768, 860, 900, 1024, 1440 — all three pages): no
@@ -24,37 +36,38 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   unnamed link or button; no console or network errors. **Apply the WCAG 2.5.8 inline
   exemption** — a link inside a sentence is size-constrained by line-height and is not a
   failure.
-- **Structure** (`index.html`): 22 sprite symbols with none orphaned; 6 tabs and 6 panels;
-  exactly one panel visible on load, and it is `#top`; 16 command rows; 4 filter chips; 6 FAQ
-  items; 9 cards in `#features`; 3 in `#trust`; `#dashboard-features` with exactly 3 `<li>`s
-  and exactly 1 outbound link; every `.cmd__name` computes `direction: ltr` and starts with
-  `/`, with no exceptions.
+- **Structure** (`index.html`): **23** sprite symbols with none orphaned (was 22); **7 tabs
+  and 7 panels** (was 6 and 6); exactly one panel visible on load, and it is `#top`; 16
+  command rows; 4 filter chips; 6 FAQ items; 9 cards in `#features`; 3 in `#trust`;
+  `#dashboard-features` with exactly 3 `<li>`s and exactly 1 outbound link; every
+  `.cmd__name` computes `direction: ltr` and starts with `/`, with no exceptions.
 - **Tab routing**: a tab click swaps the visible panel, pushes the hash, moves
   `aria-current="page"`, and updates the topbar crumb; browser Back returns to the previous
   panel; an in-page CTA (`.hero__actions a[href="#features"]`) routes through the same
   handler so the tabs can never disagree with what is on screen.
-- **Deep links, at 390px and 1440px** — `#top`, `#features`, `#commands`, `#trust`, `#faq`,
-  `#about-us`, plus the two nested anchors `#about` and `#dashboard-features`: each opens the
-  right panel, and **a panel deep link lands at `scrollY === 0`** while a nested one scrolls
-  past zero to its element. That scroll assertion is the one that caught a real bug — see the
-  `scroll-behavior` trap below.
+- **Deep links, at 390px and 1440px** — `#top`, `#features`, `#commands`, **`#pricing`**,
+  `#trust`, `#faq`, `#about-us`, plus the two nested anchors `#about` and
+  `#dashboard-features`: each opens the right panel, and **a panel deep link lands at
+  `scrollY === 0`** while a nested one scrolls past zero to its element. That scroll
+  assertion is the one that caught a real bug — see the `scroll-behavior` trap below.
 - **Filtering**: all=16, mod=5, setup=8, info=3, the three summing to 16, and exactly one
   chip carrying `aria-pressed="true"`.
-- **No-JS** (`page.setJavaScriptEnabled(false)`): all 6 panels rendered, all 16 command rows
-  rendered, filter chips `display: none`, the menu toggle `display: none`, `.reveal` elements
-  at `opacity: 1`, and `.foot__nav` carrying all six tab hrefs — that last one is the
-  assertion that stops a new tab from silently stranding no-JS phones.
+- **No-JS** (`page.setJavaScriptEnabled(false)`): all **7** panels rendered (was 6), all 16
+  command rows rendered, filter chips `display: none`, the menu toggle `display: none`,
+  `.reveal` elements at `opacity: 1`, and `.foot__nav` carrying all **seven** tab hrefs (was
+  six) — that last one is the assertion that stops a new tab from silently stranding no-JS
+  phones.
 - **connect.html is gone**: `/connect.html` returns 404; no `a[href*="connect.html"]` remains
   on the site; exactly 2 links point at `dashboard.musaed.dev/auth/login` and 5 at the
   dashboard host in total.
 - **Menu behaviour** (320/375/412): `.side` computes `position: sticky`; `.topbar` is
   `display: none`; the toggle is shown; the menu starts closed with `aria-expanded="false"`
   and `visibility: hidden`; the panel's invite is `display: none` so the invite is not
-  duplicated on one screen. Then: the closed menu exposes **0** links and the open one **10**
-  (6 tabs + لوحة التحكم + 3 legal); a click opens it and the panel sits flush under the bar
-  and inside the viewport; Escape closes it and returns focus to the toggle; a link click
-  closes it *and* navigates; an outside tap closes it; crossing 900px with it open clears
-  both `aria-expanded` and `is-open`.
+  duplicated on one screen. Then: the closed menu exposes **0** links and the open one **11**
+  (was 10 — 7 tabs + لوحة التحكم + 3 legal); a click opens it and the panel sits flush under
+  the bar and inside the viewport; Escape closes it and returns focus to the toggle; a link
+  click closes it *and* navigates; an outside tap closes it; crossing 900px with it open
+  clears both `aria-expanded` and `is-open`.
 - **Desktop chrome** (1440): `.side` sticky and exactly 256px; `.topbar` shown;
   `.side__actions` hidden; `.side__menu` `visibility: visible`; every tab ≥44px tall.
 - **FAQ**: starts fully closed; opening a second item closes the first (native
@@ -65,11 +78,16 @@ The suite that currently passes lives outside the repo. Recreate it to assert:
   `--accent-soft` (9% alpha) against the panel colour alone reports 1:1 and judging it
   against `--bg` alone reports a value it never actually has.
 
-**231 assertions, all passing — rerun 2026-08-25** in headless Chrome 152 against
+**231 assertions, all passing — rerun 2026-08-25**, now stale, in headless Chrome 152 against
 `python -m http.server`, covering the three pages × nine widths plus everything above. This
 supersedes the old 154-assertion suite entirely: that one asserted on `.bento` and
 `.cmdgroup`, neither of which exists after the rebuild. Its 17 menu assertions were stale
 since 2026-08-05; the phone menu is asserted again here, and this time the run is real.
+**Not rerun since `#pricing` shipped (2026-09-04)** — the counts throughout this section
+were hand-corrected for the new panel, but the actual suite (which lives outside this repo,
+per the top of this file) needs a real rerun before anyone can claim a passing number again;
+add the `#pricing` panel's own contrast/tap-target/reveal-stagger checks (`.plan`, `.compare`,
+the new `.btn--primary` CTA) while doing it.
 
 **Worst measured contrast on the page is 4.99:1** (white on `--discord`). Every grey clears
 comfortably: `--text-dim` 7.4:1, `--text-mute` 6.1:1, `--text-faint` 5.3:1 on `--bg`. The

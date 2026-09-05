@@ -15,9 +15,10 @@ config — no build command, output directory is the repo root.
 ## `index.html` panels and anchors
 
 **Rebuilt 2026-08-25 from a design mockup.** The page was one long scroll with anchor
-sections; it is now a sidebar (a sticky header on phones) plus **six tab panels**, only one
-of which is rendered at a time. Nothing was dropped — two of the old sections now live
-*inside* a panel rather than owning one.
+sections; it is now a sidebar (a sticky header on phones) plus tab panels, only one of which
+is rendered at a time. Nothing was dropped — two of the old sections now live *inside* a
+panel rather than owning one. **Eight panels as of 2026-09-05** (`#pricing` joined the
+original six on 2026-09-04, `#why-musaed` on 2026-09-05).
 
 Every panel is present in the HTML and nothing is hidden until `main.js` runs, so a crawler
 and a no-JS browser get the whole document. The tabs are `<a href="#panel-id">`, not buttons,
@@ -28,8 +29,10 @@ which is what keeps the old URLs working in both modes.
 | البداية | `#top` | hero + 3 facts, 4 quick cards, `#about`, `#stats` (`hidden`) |
 | الأنظمة | `#features` | the eight systems, 9 cards + the durations call-out |
 | الأوامر | `#commands` | filter chips, 16 command rows, `#dashboard-features` |
+| الأسعار | `#pricing` | 2 plan cards + a compare table — **new 2026-09-04**, numbers-only, no self-serve billing |
 | الأمان | `#trust` | the three product guarantees |
 | أسئلة شائعة | `#faq` | 6 `<details>` items — **new in this rebuild** |
+| ليش مساعد؟ | `#why-musaed` | competitor comparison — **new 2026-09-05**, a `.filters`-style switcher (MEE6 / Dyno) driven by `initVersus()`; 2 `.vs` blocks |
 | من نحن | `#about-us` | the project and people, plus the community server |
 
 `#about` (مبني لمجتمعات عربية) and `#dashboard-features` are **nested anchors**: they have no
@@ -84,15 +87,36 @@ replaced with the hamburger on the same day, at the owner's request. If you find
   and the header invite hidden.
 - **The invite is not duplicated on one screen.** `.side__invite` (header) shows only below
   900px; `.side__foot-invite` (in the panel) is `display: none` there and only appears in the
-  desktop sidebar. Four invite links in the DOM, never more than three visible.
+  desktop sidebar. Five `oauth2/authorize` links in the DOM (the fifth is the `#pricing`
+  bottom CTA), never more than four visible at once.
 - **Without JS the toggle is hidden**, since it couldn't do anything, and the footer is the
-  fallback — `.foot__nav` carries all six tab destinations for exactly this case. Add a tab
-  and you must add a footer link, or no-JS phones lose it.
+  fallback — `.foot__nav` carries all eight tab destinations (six before `#pricing` 2026-09-04,
+  seven before `#why-musaed` 2026-09-05) for exactly this case. Add a tab and you must add a
+  footer link, or no-JS phones lose it.
 - **Escape closes and returns focus to the toggle; an outside tap closes; crossing 900px with
   it open clears `is-open`** — otherwise a rotation leaves the class set on a sidebar that no
   longer has a panel.
 - **The panel caps at `min(70dvh, 560px)` and scrolls internally**, so a short phone in
   landscape cannot end up with a menu taller than the screen.
+
+## The command filter and the versus switch
+
+Two near-identical toggles, both reusing `.filters` / `.filter` and both hidden by
+`.no-js .filters` because everything they toggle is rendered anyway.
+
+- **`initFilters()`** — the `#commands` category chips. `[data-filter]` buttons show/hide
+  `[data-cat]` rows inside `[data-cmds]`; `[data-cmds-empty]` appears if a category is empty.
+- **`initVersus()`** — the `#why-musaed` bot switcher (MEE6, Dyno). `[data-vs]` buttons toggle
+  `hidden` on `[data-vs-panel]` blocks (`.vs`), one visible at a time; the first button's
+  target is applied on load. No `.reveal` inside the `.vs` blocks — they're shown by a click
+  after the reveal observer has already passed them, so an animated-in block would stay at
+  `opacity: 0`. `refreshReveals()` only runs on *panel* activation, not on a versus switch.
+  Adding a third comparison (e.g. an Arabic rival) is one more button + one more `.vs` block,
+  no JS change.
+
+Neither function touches the tab router. Adding a third toggle of this shape means a third
+`initX()` and a matching `.no-js .filters` group — do not fold them into one generic helper
+unless all three genuinely share behaviour.
 
 ## Phone layout, generally
 
@@ -107,7 +131,8 @@ replaced with the hamburger on the same day, at the owner's request. If you find
   (`minmax(140px, 175px) 1fr auto`) only earns its columns when the description still has
   room beside a fixed-width name; `.cmd`'s base state is a single column.
 - **Without JS the filter chips are hidden** (`.no-js .filters`), since all sixteen rows are
-  rendered anyway and the controls could not do anything.
+  rendered anyway and the controls could not do anything. The same rule hides the
+  `#why-musaed` bot switcher (also `.filters`); its three `.vs` blocks then stack.
 - **320px still fits brand + invite + toggle on one row**, but only because `.side__invite`
   sheds padding below 900px and again below 360px. That's the tightest thing on the page.
 

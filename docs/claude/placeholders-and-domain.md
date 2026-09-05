@@ -16,7 +16,7 @@ against an undefined value.
 ```bash
 grep -rn "data-mock" index.html               # 1 — the uptime .stat only
 grep -rn "data-placeholder-link" index.html   # 0 — every link is real now
-grep -c  "oauth2/authorize" index.html        # 4 — the live invite, must be identical
+grep -c  "oauth2/authorize" index.html        # 5 — the live invite, must be identical
 grep -n  "STATS_ENDPOINT" assets/js/main.js   # now the real dashboard URL
 ```
 
@@ -33,13 +33,15 @@ manage, session expiry) and the shortcuts feature's user-authored text. Staged f
 content is absorbed) before being split into `privacy.html` / `terms.html` by hand. The only
 invented values left anywhere on the site are the three `#stats` numbers.
 
-**The bot invite is live and appears four times in the DOM** — sidebar footer, phone header,
-desktop topbar, hero — each opening in a new tab with `rel="noopener noreferrer"`. It was
-three (nav, hero, about) until the 2026-08-25 rebuild. Two of the four are mutually exclusive
-by media query, so a visitor sees three on desktop and two on a phone; see
-`docs/claude/implementation-reference.md` for which is which. There is no single source for the URL, so a change to
-one is a change to all three. Its `permissions` integer is what Discord pre-ticks on the
-authorize screen — editing it changes what the bot is granted on join, so do not "tidy" it.
+**The bot invite is live and appears five times in the DOM** — sidebar footer, phone header,
+desktop topbar, hero, and the `#pricing` panel's bottom CTA — each opening in a new tab with
+`rel="noopener noreferrer"`. It was three (nav, hero, about) until the 2026-08-25 rebuild, then
+four once counted correctly after that rebuild, then five when the pricing tab's CTA bar was
+added. Two of the five are mutually exclusive by media query, so a visitor sees four on desktop
+and three on a phone; see `docs/claude/implementation-reference.md` for which is which. There
+is no single source for the URL, so a change to one is a change to all five. Its `permissions`
+integer is what Discord pre-ticks on the authorize screen — editing it changes what the bot is
+granted on join, so do not "tidy" it.
 
 **It requests `permissions=8` — Administrator, and nothing else — as of 2026-08-10.** This
 is a deliberate reversal of the previous design: the invite used to request an explicit
@@ -61,11 +63,14 @@ a real endpoint is a one-constant change. The declaration is space-aligned, so
 
 ## The hardcoded domain
 
-`https://musaed.dev` — **16 absolute URLs, 4 per page across 4 pages**: `canonical`, `og:url`,
-`og:image`, `twitter:image`. Crawlers reject relative URLs, so it is written literally.
-(`404.html` carries none of the four and is not part of the sixteen — an error page has no
-canonical address. This was 20 URLs across 5 pages before `updates.html` was removed
-2026-08-25 — see `docs/claude/page-notes.md`.)
+`https://musaed.dev` — **15 absolute URLs**. Four per page across the three real pages are
+the metadata quartet: `canonical`, `og:url`, `og:image`, `twitter:image`. Crawlers reject
+relative URLs, so it is written literally. (`404.html` carries none of the four and is not
+counted — an error page has no canonical address. This was 20 across 5 pages before
+`updates.html` was removed 2026-08-25 — see `docs/claude/page-notes.md`.) **`index.html`
+carries three more** as of 2026-09-05, all inside its JSON-LD `SoftwareApplication` block:
+`url`, `image` (the avatar, the only reference to `musaed-avatar.png` as an absolute URL),
+and `author.url`. A domain move has to fix those three by hand along with everything else.
 
 **These moved off `musaed.up.railway.app` on 2026-08-08.** That host served the site too and
 always had, so nothing was broken — which is exactly why it went unnoticed: two live hosts
@@ -84,12 +89,14 @@ which needs no second host. Treat any surviving mention as stale.
 grep -ohE 'https://[a-z0-9.-]+' *.html | sort -u
 ```
 
-That must print exactly four hosts: the site's, `discord.gg` for the community invite
-(`https://discord.gg/QvNXvDDFtz` — **live, not a placeholder**), `discord.com` for the
-bot-invite URL and the link to Discord's own terms, and
-`dashboard.musaed.dev` — the dashboard (a separate deployable, `docs/claude/dashboard.md`).
+That must print exactly five hosts: the site's, `discord.gg` for the community invite
+(`https://discord.gg/CcwRT6K5qv` — **live, not a placeholder**), `discord.com` for the
+bot-invite URL and the link to Discord's own terms,
+`dashboard.musaed.dev` — the dashboard (a separate deployable, `docs/claude/dashboard.md`),
+and `schema.org` — the `@context` identifier in `index.html`'s JSON-LD, which is a spec URN
+that is never fetched and never a hyperlink, so it is not part of any domain move.
 
-**The dashboard host appears 5 times as of 2026-08-25, all in `index.html`.** Its history is
+**The dashboard host appears 6 times as of 2026-09-05, all in `index.html`.** Its history is
 worth knowing, because the shape keeps changing under it:
 
 | When | Count | Where |
@@ -97,16 +104,19 @@ worth knowing, because the shape keeps changing under it:
 | until 2026-08-11 | 1 | `connect.html` only — the login buttons pointed at *that page*, not at the host |
 | 2026-08-11 | 5 | plus 3 `.cmdgroup__note` lines and 1 in `#dashboard-features` |
 | 2026-08-25 (rebuild) | 4 | the flat command list collapsed the 3 notes into 1; `#faq` added 1 |
-| 2026-08-25 (connect removed) | **5** | `connect.html` deleted, its 1 gone — but both login buttons now carry the host directly |
+| 2026-08-25 (connect removed) | 5 | `connect.html` deleted, its 1 gone — but both login buttons now carry the host directly |
+| 2026-09-05 (`#pricing` Pro CTA) | **6** | the Pro card's upgrade button points at `/pricing/get-pro` |
 
-Today that is **2 login hrefs** (`https://dashboard.musaed.dev/auth/login` — the sidebar
-«لوحة التحكم» button and the topbar icon link) plus **3 informational links** (`.cmds__note`,
-`#dashboard-features`, and the "وين أضبط الأنظمة؟" FAQ answer). The informational three stay
-bare `https://dashboard.musaed.dev` on purpose: they are "read more about this feature"
-pointers, not "log in" CTAs. If the dashboard host ever moves, **grep for the host, not for
-`auth/login`** — all five live in one file now, but they are two different kinds of link and
-only the two login ones carry a path. The 12 `canonical`/`og:url`/`og:image`/`twitter:image`
-URLs are a separate set pointed at this site own host exclusively, unaffected by any of it.
+Today that is **3 action hrefs that carry a path** — `https://dashboard.musaed.dev/auth/login`
+twice (the sidebar «لوحة التحكم» button and the topbar icon link) and
+`https://dashboard.musaed.dev/pricing/get-pro` once (the `#pricing` Pro card's `.btn--accent`
+upgrade button) — plus **3 informational links** (`.cmds__note`, `#dashboard-features`, and the
+"وين أضبط الأنظمة؟" FAQ answer). The informational three stay bare
+`https://dashboard.musaed.dev` on purpose: they are "read more about this feature" pointers,
+not CTAs. If the dashboard host ever moves, **grep for the host, not for `auth/login`** — all
+six live in one file now, but they are two different kinds of link and only the three action
+ones carry a path. The 12 `canonical`/`og:url`/`og:image`/`twitter:image` URLs are a separate
+set pointed at this site own host exclusively, unaffected by any of it.
 
 **`connect.html` was removed on 2026-08-25** — see `docs/claude/page-notes.md` for the full
 record. It was the pre-auth disclosure screen the two login buttons used to pass through: a

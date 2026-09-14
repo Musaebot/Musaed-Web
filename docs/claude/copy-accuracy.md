@@ -50,9 +50,9 @@ restated feature detail. Two groups (`الحماية التلقائية`, `بو�
 subcommand and were removed as standalone groups entirely; they now live in one line each
 inside a new small section right after `#commands`, `#dashboard-features`
 (`ميزات تُدار من الداشبورد`), which carries a single shared dashboard link for all of them
-rather than one per item. **It holds three `<li>`s, not two, as of 2026-08-17** —
-auto-responses was added alongside automod and agegate for the same reason (a real system
-with no slash commands); the single shared link did not change. `اختصارات نصية` (shortcuts, `/اختصار`) was removed from `#commands`
+rather than one per item. **It holds four `<li>`s, not three, as of 2026-09-14** — the trap
+channel joined automod, agegate, and auto-responses for the same reason (a real system with
+no slash commands); the single shared link did not change. `اختصارات نصية` (shortcuts, `/اختصار`) was removed from `#commands`
 outright with no dashboard note at all — it simply is not in the owner's 16-command allow-list
 and was not one of the five sections named for the "rest is on the dashboard" treatment. Don't
 assume that means the feature is gone from the bot; it means this page stopped listing it and
@@ -123,10 +123,12 @@ you're handed that guide, read §4, §7 (or wherever the
 bot repo lists its commands/permissions) and cross-check every group and row here before
 doing anything else asked of you.
 
-The eight real systems: moderation, automod (banned words + spam + raid detection), welcome,
+The nine real systems: moderation, automod (banned words + spam + raid detection), welcome,
 account-age gate, captcha, support tickets, text shortcuts (admin-defined trigger words for
-ban/kick/timeout), auto-responses (admin-defined trigger word → canned reply). Plus Arabic
-duration parsing, which is the most distinctive feature and is worth keeping prominent.
+ban/kick/timeout), auto-responses (admin-defined trigger word → canned reply), and the trap
+channel (admin nominates an existing channel; anyone who posts there is timed out, kicked, or
+banned per a single per-guild policy). Plus Arabic duration parsing, which is the most
+distinctive feature and is worth keeping prominent.
 
 **It was seven until 2026-08-17.** Auto-responses (`الردود التلقائية`) shipped on the bot
 side 2026-08-16 and the site had never mentioned it — found by diffing the bot/dashboard
@@ -137,21 +139,51 @@ section's history describes. It got a `#features` card (icon `i-chat-text`) and 
 the time; it no longer exists — removed 2026-08-25, above.) It has no slash commands at all,
 so it gets **no `#commands` row** — same shape as automod and agegate.
 
-**A ninth system exists on the bot side and must stay off this site.** The honeypot trap
-channel (`قناة الفخ`) is gated to a single pilot guild and is not released; it is not one of
-the eight above. Do not add it to `#features`, `#dashboard-features`, or the counts, however
-complete the bot-side documentation looks — publishing an unreleased feature is worse than
-omitting a released one.
+**The honeypot trap channel (`قناة الفخ`) shipped on the site 2026-09-14, becoming the ninth
+system.** It had existed bot-side since 2026-08-16 but stayed off this site while it was
+gated to a single pilot guild; the pilot gate came off on the bot's 2026-08-18 release (an
+empty `PILOT_FEATURES` set — checked directly in `core/pilot.py` before writing any of this),
+so by the time it was added here it had already been live for every guild for weeks. It got a
+`#features` card (icon `i-lock`, reused — no unused icon fit better) and a
+`#dashboard-features` row (it has no slash commands, same shape as automod/agegate/
+auto-responses), and the site's eight-count moved to nine: `#features`'s lede (`ثمانية أنظمة`
+→ `تسعة أنظمة`), the hero fact (`8` → `9` أنظمة). `llms.txt` and `pricing.txt` were updated to
+match (eight → nine, trap channel added to both systems lists).
+
+**What the card body says and doesn't say.** An admin nominates an existing channel as the
+trap; a warning notice posts in it; whoever writes there anyway gets timed out (default),
+kicked, or banned, and the action lands in the same mod log as any other punishment. The card
+deliberately does not claim it catches raiders in general — the bot-side docstring
+(`cogs/honeypot.py`) is explicit that the captcha lockdown hides the channel from unverified
+members, so what actually trips it is an account that already passed verification: a
+captcha-solving bot, a compromised account, or a member ignoring the notice. Don't upgrade the
+card copy to a broader anti-raid claim; that would misstate what the feature catches.
 
 **Being a "real system" and having a `#commands` presence are no longer the same claim.**
-Automod, account-age gate and auto-responses are all still real, all still count toward the
-eight above, and none of them has a single row in `#commands` — they're dashboard-only from
-this page's point of view (see `#dashboard-features`, above). Don't use "it's not in
-`#commands`" as evidence a system stopped existing; check the dashboard-managed groups and
-`#dashboard-features` before concluding that.
+Automod, account-age gate, auto-responses, and now the honeypot trap channel are all still
+real, all still count toward the nine above, and none of them has a single row in
+`#commands` — they're dashboard-only from this page's point of view (see
+`#dashboard-features`, above). Don't use "it's not in `#commands`" as evidence a system
+stopped existing; check the dashboard-managed groups and `#dashboard-features` before
+concluding that.
 
 **`#trust` quotes no numbers** for retention windows or automod thresholds — those are
 server-configurable defaults, not promises. Do not add figures there.
+
+## The hero mock console — decorative, new 2026-09-14
+
+The hero redesign added `.hero__mock`, a small illustrative "console" panel (`aria-hidden`,
+≥1024px only) showing example command lines: `/timeout عضو#4821 1h30m`, `/warn عضو#1190`,
+a `/modlogs` mention, and a قناة الفخ (honeypot) line. **It is not a claim about a specific
+real event** — `عضو#4821`/`عضو#1190` are generic placeholder tags, the same spirit as the
+`.chips` duration examples (`1h30m` is literally reused from there). The commands shown
+(`/timeout`, `/warn`, `/modlogs`) are real, on the `#commands` allow-list; the outcomes
+described (auto-timeout, a saved warning, the trap channel auto-punishing) are real
+behavior. It does **not** need to be kept in sync with `#commands`' row count or content —
+it is illustration, not a command reference, and adding/removing a real command doesn't
+obligate a matching edit here. If a command shown here is ever removed from the bot
+entirely (not just off the `#commands` allow-list), swap it for another real one rather
+than leaving a dead example.
 
 ## `#why-musaed` — the comparison panel, new 2026-09-05
 
@@ -160,8 +192,9 @@ the first that makes claims about **other people's bots**. A switcher (`.filters
 `initVersus()`) toggles one `.vs` block at a time: MEE6, Dyno.
 
 - **Every "مساعد" cell is bound by the same rule as the rest of the site** — true to the
-  bot, no invented numbers. The panel deliberately states "8 أنظمة" and "كل الأنظمة مجانية"
-  and the same Free/Pro framing as `#pricing`, nothing sharper.
+  bot, no invented numbers. The panel deliberately states "كل الأنظمة مجانية" (no digit — it
+  never names a system count, so it didn't need editing when the count moved 8 → 9) and the
+  same Free/Pro framing as `#pricing`, nothing sharper.
 - **Every competitor cell must be fair and defensible.** MEE6 and Dyno rows stick to
   well-known, stable facts (English-first, MEE6's levelling, Dyno's configurable automod,
   both paywall a Premium tier). A `vs__foot` line dates the whole thing ("سبتمبر 2026")

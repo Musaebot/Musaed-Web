@@ -20,7 +20,11 @@ npx @puppeteer/browsers install chrome-headless-shell@stable
 **Two panels shipped after this suite last ran — `#pricing` (2026-09-04, seventh tab) and
 `#why-musaed` (2026-09-05, eighth). Every count below that involves the tab/panel/footer/menu
 structure is now stale by two, not one; the inline "(was N)" notes were written for the
-`#pricing` step only.** What actually happened instead: both panels were checked by hand in a
+`#pricing` step only.** On top of that, the honeypot trap channel shipped on the site
+2026-09-14 (`docs/claude/copy-accuracy.md`), adding a tenth `#features` card and a fourth
+`#dashboard-features` `<li>` — the "9 cards in `#features`" and "exactly 3 `<li>`s" figures
+in the stale block below are now off by one each too, on top of the panel/tab staleness
+already noted. What actually happened instead: both panels were checked by hand in a
 real browser (widths, RTL, no horizontal scroll, console clean, tap targets by eye) — not a
 substitute for rerunning the suite, so treat the numbers below as "what to update the
 recreated suite to," not as a passing result. Current true values: **24** sprite symbols,

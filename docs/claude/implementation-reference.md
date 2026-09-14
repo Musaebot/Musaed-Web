@@ -27,7 +27,7 @@ which is what keeps the old URLs working in both modes.
 | Tab | Panel id | Contains |
 | --- | --- | --- |
 | البداية | `#top` | hero + 3 facts, 4 quick cards, `#about`, `#stats` (`hidden`) |
-| الأنظمة | `#features` | the eight systems, 9 cards + the durations call-out |
+| الأنظمة | `#features` | the nine systems, 10 cards + the durations call-out |
 | الأوامر | `#commands` | filter chips, 16 command rows, `#dashboard-features` |
 | الأسعار | `#pricing` | 2 plan cards + a compare table — **new 2026-09-04**, numbers-only, no self-serve billing |
 | الأمان | `#trust` | the three product guarantees |

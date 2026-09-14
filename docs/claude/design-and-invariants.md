@@ -12,8 +12,9 @@
   is for Latin/mono only. Arabic also needs a taller line-height than Latin.
 - **Discord blurple is scoped to `.btn--primary` only** — buttons whose destination is
   Discord. Spread it further and it stops reading as "this goes to Discord" and starts
-  reading as a second brand colour. Everything else is green: **46 `var(--accent)` usages**
-  (38 in `styles.css`, 8 in `legal.css`). Measured, not counted by hand —
+  reading as a second brand colour. Everything else is green: **50 `var(--accent)` usages**
+  (42 in `styles.css`, 8 in `legal.css`, re-measured 2026-09-14 after the hero redesign).
+  Measured, not counted by hand —
   `grep -c 'var(--accent)' assets/css/*.css`. Note `var(--accent-soft)`,
   `var(--accent-line)` and `var(--on-accent)` do not match that pattern and are not part of
   the count. The `styles.css` figure was 21 before the 2026-08-25 rebuild; the page grew a
@@ -25,6 +26,11 @@
   2026-09-04 had `.btn--accent` added then removed when the CTA was briefly a Discord link
   (`.btn--primary`); it is back now that the destination is `dashboard.musaed.dev/pricing/get-pro`.
   37 → 38 on 2026-09-05 when the `#why-musaed` panel added `.vs .compare__head .compare__col--pro`.
+  **Re-measured 2026-09-14, twice, ending at 42** — first an 8→40 pass (card-icon badges,
+  the active-tab indicator bar), then the hero redesign added the `.hero__mock` decorative
+  console panel (`.mock__cmd`, `.mock__log .icon`), landing at 42. Trust a fresh
+  `grep -c 'var(--accent)' assets/css/*.css` over hand-incrementing from any number in this
+  file's history — it has drifted from the true count more than once today.
   `legal.css` lost one on 2026-08-25 when `.notice` went with `connect.html`
   (`docs/claude/page-notes.md`), 8 → 7. The same day's legal-page redesign then swapped
   `.docnext:hover`'s green border for `var(--line-strong)` (matching `.card:hover`) but
@@ -80,10 +86,12 @@ Each of these was found by measuring, and each looks harmless to "clean up".
   the leading slash stays left — but `dir` also flips the block's own alignment, so
   `.cmd__name` sets `text-align: end`, which resolves against the element's *own* `ltr`
   direction and therefore means right. Together they put names on the page's reading edge
-  with characters running left to right. **21 `dir="ltr"` attributes: 16 command names, 4
-  Latin chips, 1 inline `.code`**, out of 16 total command rows — every command name is
-  Latin, so that ratio is 1:1. (27 before the 2026-08-25 rebuild, when there were 11 chips.)
-  Drop either half and you get a zigzag, or a slash on the wrong side.
+  with characters running left to right. **26 `dir="ltr"` attributes as of 2026-09-14** (was
+  21: 16 command names, 4 Latin chips, 1 inline `.code`) — the hero redesign's decorative
+  `.hero__mock` console panel added 5 more (`/timeout`, `1h30m`, `/warn`, `/modlogs` ×1 each,
+  used as illustrative examples of real commands, not new `#commands` rows — see
+  `docs/claude/copy-accuracy.md`). Drop either half (the `dir` or the matching `text-align`/
+  `unicode-bidi`) and you get a zigzag, or a slash on the wrong side.
 - **`.cmd__name` means "a registered slash command" and things assert on it.** A Latin token
   inside a sentence — the `1h30m` in the "مدد بالعربي" card — uses `.code` instead. They look
   nearly identical; the split exists because the test suite asserts that every `.cmd__name`

@@ -22,6 +22,13 @@ Several counts in `docs/claude/testing-and-traps.md` were pinned at six and are 
 until the measurement suite is rerun — read that file's own note before trusting a number
 in it.
 
+**Nine systems as of 2026-09-14.** The honeypot trap channel (`قناة الفخ`) — live bot-side
+since 2026-08-16, no longer pilot-gated since 2026-08-18 — shipped on the site: a `#features`
+card, a `#dashboard-features` row (no slash commands), and the systems count moved 8 → 9
+everywhere it was stated (hero fact, `#features` lede, `llms.txt`, `pricing.txt`). See
+`docs/claude/copy-accuracy.md` for the full record and what the card copy does and doesn't
+claim about what the trap catches.
+
 **This file was split on 2026-08-25 into this slim root plus `docs/claude/*.md` files.**
 Root keeps only identity, the hard rules, and the "Where to find things" table below.
 Everything else — the detailed reference material, the change history, the per-feature
@@ -186,13 +193,58 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
   MEE6's free tier is after its paywall creep. The owner's 2026-09-05 pass did **not** touch
   these — they are claims about another product and the current wording is defensible.
 
+### Shipped 2026-09-14
+
+- **Honeypot trap channel (`قناة الفخ`) released on the site**, becoming the ninth system. It
+  had been live bot-side since 2026-08-16 and out of the pilot gate since 2026-08-18, but the
+  site had never been updated to reflect that — this was purely a site-sync task, the bot-side
+  feature itself did not change. Added: a `#features` card (icon `i-lock`, reused), a
+  `#dashboard-features` row (no slash commands, same shape as automod/agegate/auto-responses),
+  the hero fact and `#features` lede moved 8 → 9, `llms.txt` and `pricing.txt` updated to
+  match. Card copy deliberately does not claim it catches raiders broadly — see
+  `docs/claude/copy-accuracy.md` for what it actually catches and why that distinction matters.
+  Promotion (community server, directories, social) is the owner's to do; not scoped here.
+- **Visual-polish pass on `index.html`, CSS-only, no markup or content changes.** The owner
+  said the landing page "isn't that good" visually. `assets/css/styles.css` (now `v=2`) got:
+  a fixed low-opacity grain overlay (`body::after`) so the flat black reads as textured
+  rather than sterile; tinted inset-highlight + drop-shadow depth on `.card`/`.plan`/`.cmds`/
+  `.compare` (previously flat border-only panels with no elevation); an icon-badge treatment
+  on `.card__icon` (background + border, reusing `--r-sm`, no new radius); a flat
+  `var(--accent)` indicator bar on the active sidebar tab (`.tab[aria-current="page"]::before`
+  — deliberately unrounded, see the note it carries in-code, to respect the two-radii lock);
+  a static faint dot-grid texture on `.hero`'s own background (separate from the existing
+  animated glow on `.hero::before`, so the two don't fight); hero-fact digits switched to
+  `var(--mono)` to match `.stat__value`'s existing treatment; and a `translateY(-1px)` hover
+  lift on `.btn`, reset under `prefers-reduced-motion` alongside the existing resets. All of
+  it stays inside the documented locks (dark-only, one accent hue, exactly two radii, motion
+  is opacity/transform only) — see `docs/claude/design-and-invariants.md`, whose
+  `var(--accent)` usage count was re-measured (38 → 40 in `styles.css`) rather than
+  hand-incremented, since the arithmetic didn't cleanly reconcile.
+- **Hero redesign, same day, because the polish pass above "looked the exact same."**
+  `styles.css` is now `v=3`. Real structural changes, still CSS-only plus one markup
+  addition, still inside every design lock: hero title scale jumped (`clamp(2rem,5.6vw,
+  3.4rem)` → `clamp(2.6rem,6.8vw,4.5rem)`, tighter line-height); `.hero__inner` is now a
+  flex row at ≥1024px — text in `.hero__content`, a new decorative `.hero__mock` "console"
+  panel beside it (`aria-hidden`, illustrates real commands/features, see
+  `docs/claude/copy-accuracy.md` — do not read it as a `#commands` reference or a real
+  logged event); `.hero__facts` gained a top divider and bigger numerals; `.wrap` padding
+  and `.shead__title` size both increased for more breathing room and a bigger section-
+  heading scale; the last `#features` card (`أوامر واضحة`) now spans two grid columns at
+  ≥900px as a deliberate asymmetric closing beat. `var(--accent)` is now 42 in `styles.css`
+  (50 total with `legal.css`); `dir="ltr"` count is 26 (was 21) — both re-measured, not
+  hand-incremented, in `docs/claude/design-and-invariants.md`. Not verified in a live
+  browser — no headless Chrome/Edge was available in-session (Edge 150 is documented broken
+  for this in `docs/claude/testing-and-traps.md`); a local server was left running on
+  `localhost:8017` for a manual look.
+
 ### Shipped 2026-09-06
 
 - **Per-tab `<title>`** — `#top` keeps the full keyworded title (what crawlers see); every
   other panel shows `"<tab label> | مساعد"` (`initTabs`/`activate` in `main.js`).
 - **Asset cache-busting** — `styles.css` / `legal.css` / `main.js` are now linked as
   `?v=N`. Bump `N` on every CSS/JS change or the CDN serves the old file for up to 4h after
-  a deploy. See `docs/claude/git-and-deploy.md`. Currently `v=1`.
+  a deploy. See `docs/claude/git-and-deploy.md`. `styles.css` is `v=2` as of 2026-09-14
+  (`legal.css` and `main.js` untouched, still `v=1`).
 
 ### Shipped 2026-09-05
 
@@ -238,9 +290,10 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
   duration chips, uptime label, `privacy.html`. This is final; do not reintroduce
   Arabic-Indic digits. (Copy may still *describe* the bot accepting both as duration input —
   that is a real bot capability, not a site-chrome choice.)
-- **The systems count is 8**, stated as `8 أنظمة` (hero) and `ثمانية أنظمة` (`#features` lede).
-  `#features` has 9 cards on purpose: 8 systems + the "أوامر واضحة" meta-card. The bot's 9th
-  system (honeypot trap channel, `قناة الفخ`) **stays off this site** — see `docs/claude/copy-accuracy.md`.
+- **The systems count is 9** as of 2026-09-14, stated as `9 أنظمة` (hero) and `تسعة أنظمة`
+  (`#features` lede). `#features` has 10 cards on purpose: 9 systems + the "أوامر واضحة"
+  meta-card. The honeypot trap channel used to be excluded here as unreleased; it shipped on
+  the site 2026-09-14 — see `docs/claude/copy-accuracy.md` and "Shipped 2026-09-14" below.
 
 ### Not the agent's to do
 

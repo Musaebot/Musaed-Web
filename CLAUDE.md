@@ -10,9 +10,10 @@ sidebar + tab panels rather than one long scrolling page. Same content, same URL
 tabs are real anchors and every old `#features`/`#commands`/`#trust`/`#about`/`#about-us`
 deep link still resolves. See `docs/claude/implementation-reference.md` for the panel map.
 **Eight panels as of 2026-09-05.** `#pricing` joined the original six on 2026-09-04 (Free/Pro
-numbers from `core/plans.py`, still **no numeric Pro price**; the Pro CTA points at the
-dashboard's `/pricing/get-pro` upgrade route as of 2026-09-05, replacing an earlier
-"contact the team" Discord link). `#why-musaed` ("ليش مساعد؟") joined 2026-09-05 — a
+numbers from `core/plans.py`, still **no numeric Pro price**). The Pro CTA pointed at the
+dashboard's `/pricing/get-pro` upgrade route from 2026-09-05 until 2026-09-17, when it was
+turned back into a "not available yet" popup — see "Shipped 2026-09-17" below; that upgrade
+flow never charges anyone and sending visitors to it read as a live purchase button. `#why-musaed` ("ليش مساعد؟") joined 2026-09-05 — a
 competitor-comparison panel sitting **after `#faq`** (late-funnel), with a `.filters`-style
 switcher (MEE6 / Dyno), driven by `initVersus()` in `main.js` — the switch replays a CSS
 cascade-in (`vs-in` keyframe in `styles.css`, added 2026-09-05; opacity/transform only,
@@ -193,6 +194,44 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
   MEE6's free tier is after its paywall creep. The owner's 2026-09-05 pass did **not** touch
   these — they are claims about another product and the current wording is defensible.
 
+### Shipped 2026-09-17
+
+- **`privacy.html` and `terms.html` got a PDPL compliance pass**, checked against the actual
+  law text (Personal Data Protection Law + its Implementing Regulation, official texts on
+  `laws.boe.gov.sa` and the Umm Al-Qura Gazette) rather than guessed at. `privacy.html` gained:
+  a stated legal basis for collection (consent or service-necessity, in the `#collect` intro),
+  a new `#breach` section committing to notify people if there's ever a security incident
+  (Implementing Regulation Article 24's 72-hour-to-SDAIA / "without undue delay"-to-the-person
+  duty — the page states the second half, not the 72h one, since that's owed to the regulator
+  not the visitor), a correction right added alongside access/deletion in `#rights` (PDPL
+  Article 4), an honest "independent project, one person, not a registered company" line
+  answering "who's the controller" (Article 13 — confirmed a natural person can lawfully be a
+  controller under Article 1(18), so this needed no legal-entity registration), and an
+  explicit "your data leaves Saudi Arabia" line in `#final` (Railway/Resend/Sentry are all
+  foreign-hosted — checked against Railway's own region list, none of its four regions are in
+  the Kingdom). `terms.html` gained: uploaded auto-response attachments folded into the
+  "your content, your liability" clause (`#your-content` used to cover text fields only), and
+  a stated consequence for violating `#acceptable-use` (access can be cut off, the bot pulled).
+  Also fixed two absolute "never shared with a third party" claims (here and in the
+  dashboard's own `/auth/connect` disclosure) that Sentry/Resend already made untrue — scoped
+  to "not for marketing" instead, naming the two vendors.
+- **The Get-Pro CTA on `#pricing` stopped linking out.** It used to send visitors straight to
+  the dashboard's `/pricing/get-pro`, a prototype that walks through a full purchase flow but
+  is coded to always fail (`_no_real_io` on that repo) — reads as a live "buy Pro" button, which
+  it isn't. The button (now a `<button>`, not an `<a>`) opens a small `<dialog id="pro-
+  unavailable">` instead, saying it's not available yet. Two elements toggled by the existing
+  `.no-js`/`.js` split (`[data-open-modal]` hidden under `.no-js`, a plain static fallback line
+  hidden under `.js`) so a scripting-off visitor still gets an accurate answer instead of a
+  dead button. Animated with native `@starting-style` + `transition-behavior: allow-discrete`
+  on the `<dialog>` and its `::backdrop` — no extra JS for the animation itself, `.showModal()`/
+  `.close()` drive it directly. Caught and fixed one real gap while wiring the reduced-motion
+  handling: the existing `*, *::before, *::after` blanket rule in the `prefers-reduced-motion:
+  reduce` block does not reach `::backdrop` (it's not `::before`/`::after`), so that pseudo-
+  element needed its own line or a reduced-motion visitor would still see the backdrop fade.
+  **Not verified in a live browser** — no Chrome binary available in-session, same gap the
+  2026-09-14 hero redesign above hit. Checked instead by hand: `node --check` on `main.js`,
+  and grepping that every id/class/data-attribute the three files reference actually lines up.
+
 ### Shipped 2026-09-14
 
 - **Honeypot trap channel (`قناة الفخ`) released on the site**, becoming the ninth system. It
@@ -243,8 +282,9 @@ The site's job in that funnel is the "ضيف البوت" conversion and the dire
   other panel shows `"<tab label> | مساعد"` (`initTabs`/`activate` in `main.js`).
 - **Asset cache-busting** — `styles.css` / `legal.css` / `main.js` are now linked as
   `?v=N`. Bump `N` on every CSS/JS change or the CDN serves the old file for up to 4h after
-  a deploy. See `docs/claude/git-and-deploy.md`. `styles.css` is `v=2` as of 2026-09-14
-  (`legal.css` and `main.js` untouched, still `v=1`).
+  a deploy. See `docs/claude/git-and-deploy.md`. `styles.css` is `v=4` and `main.js` is `v=2`
+  as of 2026-09-17 (the Get-Pro modal — see "Shipped 2026-09-17" below); `legal.css` is
+  still untouched, `v=1`.
 
 ### Shipped 2026-09-05
 

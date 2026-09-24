@@ -1,5 +1,12 @@
 # How to verify — do not reason about CSS, measure it
 
+> **Stale as of the 2026-09-24 rebuild.** This file's own note already warned that its counts
+> were "pinned at six and are now stale until the measurement suite is rerun" — that is now
+> doubly true, since the file being measured (`assets/css/styles.css`) is a full rewrite, not
+> an edit of what these counts describe. The *method* (measure, don't reason from memory) is
+> the part worth keeping. `docs/claude/implementation-reference.md` has the current headless
+> smoke-test approach used to verify the rebuild. Not yet rewritten.
+
 Reading the stylesheet has produced wrong conclusions repeatedly in this project. Every
 layout, contrast, and sizing claim below was wrong at least once before being measured.
 

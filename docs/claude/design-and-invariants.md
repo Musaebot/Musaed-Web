@@ -1,5 +1,12 @@
 # Design locks and invariants
 
+> **Stale as of the 2026-09-24 rebuild.** The measured counts below (`var(--accent)` usage,
+> `dir="ltr"` occurrences, etc.) were taken from the pre-rebuild `styles.css` and no longer
+> match the current file. The design-lock *categories* (dark-only, one accent hue, radius
+> discipline, opacity/transform-only motion) are a reasonable checklist to re-verify against
+> the new `assets/css/styles.css`, but re-measure before citing a number from here. Not yet
+> rewritten — see `docs/claude/implementation-reference.md` for the current brand tokens.
+
 ## Design locks
 
 - **Dark theme only. One accent** (`--accent`, terminal green). Never introduce a second hue.

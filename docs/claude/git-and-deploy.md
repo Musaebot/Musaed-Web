@@ -1,5 +1,11 @@
 # Git and deploy
 
+> **Partially stale as of the 2026-09-24 rebuild.** The workflow described here (commit on
+> `main`, Railway deploys it, bump `?v=N` on any CSS/JS change) is still accurate. Any
+> specific version numbers or file names below predate the rebuild — check
+> `docs/claude/implementation-reference.md` for the current `?v=` values
+> (`styles.css?v=5`, `main.js?v=3`, `i18n.js?v=1`, `legal.js?v=1`, `legal.css?v=2`).
+
 Work happens on **`main`**, which is what Railway deploys. Commit and push only when asked.
 
 **Before you commit, `CLAUDE.md` has to be current** (hard rule 8). If the change adds or

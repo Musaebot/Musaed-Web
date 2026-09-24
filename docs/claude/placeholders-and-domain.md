@@ -1,5 +1,13 @@
 # Placeholders — everything still open
 
+> **Stale as of the 2026-09-24 rebuild.** Every specific count in this file (invite-link
+> occurrences, dashboard-host occurrences, panel names like `#pricing`) was measured against
+> the pre-rebuild `index.html` and no longer holds — the current build has a different link
+> layout entirely (see `docs/claude/implementation-reference.md` "Real links and live data").
+> The *principles* still apply: the domain is hardcoded in a lot of places and a move has to
+> touch all of them; `sitemap.xml`/`robots.txt` aren't covered by an `.html`-only grep; no
+> invented numbers remain. Re-measure before trusting a count here. Not yet rewritten.
+
 **Servers and members went live** when `/api/public/stats` shipped on the
 dashboard (`../Musaed-Dashboard/app/routers/public.py`) — `STATS_ENDPOINT` in
 `main.js` now points at it and `#stats` is no longer `hidden`. Uptime is the

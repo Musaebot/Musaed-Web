@@ -1,5 +1,11 @@
 # Per-page notes
 
+> **Partially stale as of the 2026-09-24 rebuild.** The historical removal record below
+> (`connect.html`, `updates.html`, `developer.html`, `#stats` being hidden) is still accurate
+> history and doesn't need re-verifying. Anything describing the *current* page structure —
+> panel names, section IDs — predates the rebuild; check
+> `docs/claude/implementation-reference.md` instead.
+
 **`google82b70d7af988f7a9.html` is not a page.** It is the file Google Search Console issues
 for the HTML-file verification method: single line of plain text, no doctype, no `<html>`.
 It has to be reachable at exactly `https://musaed.dev/google82b70d7af988f7a9.html` — root of

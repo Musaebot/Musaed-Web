@@ -1,246 +1,251 @@
-# Implementation reference
+# Implementation reference — the 2026-09-24 rebuild
 
-Folded in from `README.md` when that file was rewritten into a short human-facing page
-(2026-08-25) — this is the detail an AI session working on the CSS/JS/markup needs that
-didn't already live above. No history or reasoning trimmed here beyond what README itself
-had already gone stale on (checked against the live markup, not copied blind).
+**Replaced outright on 2026-09-24.** The previous version of this file documented the
+sidebar-plus-tab-panels `index.html` that existed before that date. This version documents
+the current build: a long-scrolling, bilingual landing page ("the gatekeeper" redesign),
+brought into this repo from a separate working folder in the same batch that self-hosted its
+fonts, ported its JSON-LD, and fixed its asset paths to this repo's `assets/` convention. If
+you're looking for how the *old* tabbed page worked, that's gone — don't reach for git
+history expecting to restore it without checking with the owner first (see root `CLAUDE.md`
+"What reversed").
 
-## Running it locally
+## Files
 
-No build step, nothing to install. `file://` blocks the self-hosted fonts, so serve over
-HTTP: `python -m http.server 8000` or `npx serve .`, then open `localhost:8000`. Deploys to
-any static host (Cloudflare Pages, Netlify, Vercel, Railway's staticfile provider) with zero
-config — no build command, output directory is the repo root.
+| File | Purpose |
+| --- | --- |
+| `index.html` | The landing page. All visible text is written in English and tagged with `data-i18n` keys; the Arabic dictionary in `i18n.js` overrides it at runtime. |
+| `assets/js/i18n.js` | `window.MUSAED_I18N`: the Arabic dictionary (`ar`), runtime strings for both languages (`dyn`), join-gate demo accounts (`joiners`), and the slash-command list (`commands`). |
+| `assets/js/main.js` | Landing behaviour: language switch, live stats, nav, join-gate simulation, reveals, stacked layers, member-DM counter, dashboard demo, command search, scroll effects. |
+| `assets/css/styles.css` | `@font-face` rules, design tokens, layout, animations, RTL rules, reduced-motion fallbacks, and the 404 styles. Also used by the legal pages. |
+| `privacy.html`, `terms.html` | Legal pages, Arabic only. |
+| `assets/css/legal.css`, `assets/js/legal.js` | Legal pages only: reading-progress bar, contents highlighting, phone chip bar, back-to-top. |
+| `404.html` | "هذي القناة مو موجودة" page, Arabic first, no JS. |
+| `assets/Pics/musaed-favicon.svg` | The mint "م" glyph on a dark rounded square. `assets/Pics/musaed-favicon.png` and `musaed-avatar.png` are the `alternate icon`/`apple-touch-icon` fallbacks. |
 
-## `index.html` panels and anchors
+**Cache-busting:** `styles.css` is `?v=5`, `main.js` is `?v=3`, `i18n.js` and `legal.js` are
+`?v=1`, `legal.css` is `?v=2`. Bump the query string on any further edit to that file — see
+`docs/claude/git-and-deploy.md` for why (that doc's specifics predate this rebuild but the
+cache-busting mechanism itself is unchanged).
 
-**Rebuilt 2026-08-25 from a design mockup.** The page was one long scroll with anchor
-sections; it is now a sidebar (a sticky header on phones) plus tab panels, only one of which
-is rendered at a time. Nothing was dropped — two of the old sections now live *inside* a
-panel rather than owning one. **Eight panels as of 2026-09-05** (`#pricing` joined the
-original six on 2026-09-04, `#why-musaed` on 2026-09-05).
+## Language (Arabic is primary, English is a toggle)
 
-Every panel is present in the HTML and nothing is hidden until `main.js` runs, so a crawler
-and a no-JS browser get the whole document. The tabs are `<a href="#panel-id">`, not buttons,
-which is what keeps the old URLs working in both modes.
+- **Default is Arabic.** The inline script in `<head>` of `index.html` picks the language in
+  this order: `?lang=ar|en` in the URL, then `localStorage['musaed-lang']` (only `'en'`
+  overrides), then `'ar'`. It sets `lang` and `dir` on `<html>`.
+- While Arabic loads, `<html>` carries the `i18n-pending` class, which hides `<body>` until
+  `main.js` has swapped the text in. This prevents a flash of English.
+- **How the swap works:** on load, `main.js` records each `[data-i18n]` element's English
+  `innerHTML`, then writes `I.ar[key]` into it for Arabic. Attributes are handled the same
+  way through `data-i18n-attr="attr:key,attr2:key2"`.
+- **Adding or changing text:** write the English in `index.html` with a `data-i18n="section.name"`
+  key, then add the same key to `ar` in `i18n.js`. Dictionary values may contain simple markup
+  such as `<em>`, `<mark>` or `<a>`, because they are static trusted strings.
+- **Runtime text** lives in `I.dyn.en` / `I.dyn.ar`: page title, language-button label and menu
+  labels; gate rejection reasons and dashboard preview text; command categories; live-stats
+  line and bot status.
+- **Plural helpers:** `dyn.*.days(n)` and `dyn.*.attempts(n)` apply Arabic plural rules
+  (يوم / يومين / 3 أيام / 11 يوم). `arCount()` does the same for server and member counts.
+- **Adding language-dependent behaviour:** register it with `onLang(fn)` in `main.js`; it runs
+  after every switch. The join-gate demo, dashboard, commands, live stats and mobile-menu
+  label all do this.
+- **RTL rules:** use logical CSS properties (`inset-inline-*`, `margin-inline-*`,
+  `padding-inline-*`, `border-inline-*`) for anything that should mirror. Direction-specific
+  overrides use `[dir="rtl"]`: arrow icons, marquee direction (`marqueeRtl`), progress-bar
+  origin, gate-token positioning.
+- `html[lang="ar"] body * { letter-spacing: normal !important; }`: tracking breaks Arabic
+  letter joins, so never letter-space Arabic.
+- Numbers use Western digits in both languages. Command names and `7 + 5 = ?` are forced LTR
+  with `direction: ltr; unicode-bidi: isolate`.
+- **Voice:** Gulf-flavoured, friendly Arabic matching the bot's own strings (e.g. "وش", "تبي",
+  "على طول", "الحين").
+- **Legal pages are Arabic-only, on purpose** (Hard Rule 6 in root `CLAUDE.md`). Don't add an
+  English translation without the owner's sign-off.
 
-| Tab | Panel id | Contains |
+## Brand
+
+| Token | Value | Use |
 | --- | --- | --- |
-| البداية | `#top` | hero + 3 facts, 4 quick cards, `#about`, `#stats` (`hidden`) |
-| الأنظمة | `#features` | the nine systems, 10 cards + the durations call-out |
-| الأوامر | `#commands` | filter chips, 16 command rows, `#dashboard-features` |
-| الأسعار | `#pricing` | 2 plan cards + a compare table — **new 2026-09-04**, numbers-only, no self-serve billing |
-| الأمان | `#trust` | the three product guarantees |
-| أسئلة شائعة | `#faq` | 6 `<details>` items — **new in this rebuild** |
-| ليش مساعد؟ | `#why-musaed` | competitor comparison — **new 2026-09-05**, a `.filters`-style switcher (MEE6 / Dyno) driven by `initVersus()`; 2 `.vs` blocks |
-| من نحن | `#about-us` | the project and people, plus the community server |
+| `--bg` / `--bg-1..4` | `#0b0d0c` → `#232b28` | Green-tinted near-black surfaces |
+| `--accent` | `#0fe37d` | Musaed mint: buttons, highlights, logo |
+| `--accent-hi` / `--accent-deep` | `#6cf5b0` / `#0a9e57` | Hover state, gradients |
+| `--on-accent` | `#07130c` | Text on mint |
+| `--text` / `--dim` / `--mute` | `#f3f5f3` / `#a3aba4` / `#8a928c` | Text levels |
+| `--danger` | `#ff6b6b` | Rejections, kicks, the honeypot |
 
-`#about` (مبني لمجتمعات عربية) and `#dashboard-features` are **nested anchors**: they have no
-tab of their own, and hitting `/#about` opens the panel that contains it and then scrolls to
-the element. `#about` and `#trust` used to overlap (`#about` asserted tenant isolation in one
-clause); that claim now lives only in `#trust`, where it has room to say *how*. Don't put it
-back in both. `#about` and `#about-us` are intentionally separate — product vs. people — and
-`#about-us` is written in neutral project voice with no names, dates, or team size on
-purpose; that's the section to edit if it should read as a solo maintainer.
+- **Fonts, self-hosted as of this integration** (they loaded from Google Fonts in the
+  original working-folder build — see root `CLAUDE.md`'s "Fonts are now self-hosted" note):
+  - **Alexandria** (`assets/fonts/alexandria-arabic.woff2` / `alexandria-latin.woff2`) is the
+    display face; variable weight 500–900, covers Latin and Arabic.
+  - **Readex Pro** (`readexpro-arabic.woff2` / `readexpro-latin.woff2`) is the body face;
+    variable weight 300–700, also Latin and Arabic.
+  - **IBM Plex Mono** (`plex-mono-400.woff2` / `plex-mono-500.woff2`) is for labels and code,
+    Latin only. Readex Pro is second in `--f-mono` so Arabic text in mono labels falls back
+    to it.
+- **Logo:** the same Arabic letterform path used by the old site's `assets/Pics/musaed-avatar.svg`.
+  Each HTML file defines it inline as the SVG symbol `#glyph`.
+- **Icons:** hand-inlined Lucide paths as `<symbol id="i-*">`, drawn with `<svg class="i"><use href="#i-..."/></svg>`. No emoji icons.
+- **Visual theme:** "the gatekeeper". A grid background with a sweeping scan line, a mint grid
+  that lights up under the cursor, a mint ticker band, and the big Arabic word مساعد in the
+  finale.
 
-## The tab router
+## Landing page sections (in order)
 
-`initTabs()` in `main.js`. Roughly 120 lines and worth reading before changing any of it.
+1. **Nav:** a floating bar that gains a blurred background after scrolling. It holds the
+   language toggle, "دخول اللوحة" / "Log in" (≥1180px), and "Add to Discord". A mobile menu
+   takes over below 1080px.
+2. **Hero:** headline "المشاكل توقف عند الباب" / "Trouble stops at the door." with an animated
+   underline. The logo glyph draws its outline and then fills, with rotating rings and three
+   floating status chips (hidden below 1024px). The live-stats line appears under the buttons
+   once the API answers.
+3. **Join-gate demo (`#gate`):** the signature animation. Accounts travel New joins → Age gate
+   → Captcha → Honeypot → Verified. Accounts that fail turn red, shake, and show the rejection
+   reason under their gate. Joined, Verified and Stopped counters update as it runs. Below
+   820px the pipeline turns vertical. The demo pauses when off-screen or when the tab is
+   hidden, and restarts on resize or language change.
+4. **Ticker:** a mint marquee of feature names.
+5. **Protection (`#protection`):** four layers (Age gate, Captcha, Honeypot, AutoMod) as
+   sticky cards that stack from 900px up. `main.js` shrinks and dims each card as the next one
+   slides over it (`scale: var(--s)` and `filter: brightness(var(--b))`). Each card has a
+   one-shot illustration that plays when it scrolls into view.
+6. **Toolkit (`#toolkit`):** a bento grid of Tickets, Shortcuts, Auto-responses, Welcome, Mod
+   logs with `/lookup`, and Member DMs. The DM card runs a looping "Sending x / 1,204" counter.
+7. **Dashboard (`#dashboard`):** an interactive browser mock, followed by an "افتح لوحة
+   التحكم" button that goes to the real dashboard login. Controls: toggles for Age gate,
+   Captcha and Honeypot; a range slider for minimum age (1–30 days); challenge type (button or
+   math); a stepper for max attempts (1–10). A live "Discord preview" of the verify panel
+   updates as you change them, and a "Panel synced" chip flashes.
+8. **Commands (`#commands`):** a searchable, filterable list rendered from `I.commands`. 23
+   real slash commands whose Arabic descriptions are copied from the bot.
+9. **Your data (`#data`):** retention explained in three steps.
+10. **Plans (`#plans`):** Free, and Pro marked **Coming soon** (see root `CLAUDE.md` "What
+    reversed" — there is no numeric Free/Pro comparison table on the page anymore). The Pro
+    button is a non-clickable dashed pill with `aria-disabled`.
+11. **FAQ (`#faq`):** six questions in native `<details>`, animated with `::details-content`.
+    Answers 2 and 5 link to the dashboard and the support server. Mirrored word-for-word in
+    `index.html`'s JSON-LD `FAQPage`.
+12. **Finale:** a giant مساعد that fills with mint from right to left as you scroll
+    (`--fill`), then the closing CTA.
+13. **Footer:** product, resource and legal links, the language toggle, and the live bot
+    status.
 
-- **A tab click is intercepted, not followed.** The handler `preventDefault`s, `pushState`s
-  the hash, and swaps which panel carries `hidden`. `popstate` and `hashchange` both route
-  back through `syncFromHash()`, so back/forward and a pasted URL behave identically.
-- **A delegated document-level handler catches every other `a[href^="#"]`** — the hero CTA,
-  the brand mark, footer links. Without it an in-page link could leave the page showing a
-  panel the tabs disagree with.
-- **`activate()` also sets `document.title`** (added 2026-09-05). `#top` keeps the full
-  keyworded `<title>` (captured once as `baseTitle` — this is what crawlers see); every other
-  panel becomes `"<tab label> | مساعد"` so the browser tab reflects the section instead of
-  repeating the pitch. Same chokepoint as the `[data-crumb]` update, so back/forward and
-  pasted URLs are covered.
-- **`scroll-behavior: smooth` is deliberately NOT set on `html`.** A global smooth scroll
-  turns the browser's own fragment jump on a cold `/#faq` load into a ~150ms animation that
-  *starts after* the router has already reset the scroll position — and wins, landing the
-  panel with its heading tucked under the sticky bar. Measured, not theorised. The router
-  asks for smooth explicitly where it wants it (nested anchors).
-- **The initial route re-asserts `scrollTo(0, 0)` for six frames and again at `load`**
-  (`resetScroll(persist)`). Even with the instant fragment jump the browser can scroll after
-  the script runs; one reset is not enough. Later resets, from tab clicks, have no such
-  competition and use the single call.
-- **Panels get `tabindex="-1"` and focus on click**, so the next Tab press resumes inside
-  what was just opened rather than at a control that scrolled away.
+## Content rules and sources
 
-## The phone menu
+- **Every feature claim must match the bot**, whose source is at `../Musaed` (sibling
+  repo, `cogs/agegate.py`, `cogs/captcha.py`, `cogs/honeypot.py`, `cogs/automod.py`,
+  `cogs/tickets.py`, `welcome.py`, `shortcuts.py`, `autoresponse.py`, `memberdm.py`,
+  `panelsync.py`, `maintenance.py`). Slash command names and their Arabic descriptions come
+  from `core/strings.py` (`CMD_*_DESC`); group names come from the cogs.
+- If the bot adds, renames or removes commands, update `commands` in `assets/js/i18n.js` —
+  and the FAQ / featureList in `index.html`'s JSON-LD if the change is significant enough to
+  affect those.
 
-Below 900px the tabs live in a panel under the bar, opened by `.side__toggle`. It's a plain
-disclosure, not a modal — no focus trap, no scroll lock, no overlay. `initMenu()` in
-`main.js`.
+## Real links and live data
 
-**The first cut of the rebuild used a horizontally scrolling tab strip instead**, and it was
-replaced with the hamburger on the same day, at the owner's request. If you find a
-`keepTabVisible()` reference anywhere, it belonged to that strip and is gone.
+All links are hard-coded in the HTML, so they work without JS. External links open in a new
+tab (`target="_blank" rel="noopener"`).
 
-- **DOM order is brand, invite, toggle, panel.** The toggle sits immediately before the panel
-  it controls, so tabbing out of it lands in the menu with no focus management needed, and
-  DOM/visual/focus order agree at both breakpoints. No `order` property anywhere.
-- **The panel is hidden with `visibility`, not `opacity` alone** — that's what keeps its
-  links out of the tab order and accessibility tree while closed. The `visibility` transition
-  is delayed by the fade duration on close and zero on open, so it fades out rather than
-  vanishing.
-- **Mobile is the base, desktop is the override.** `.side__menu` defaults to the dropped
-  panel; the `min-width: 900px` block turns it back into the sidebar's body, with the toggle
-  and the header invite hidden.
-- **The invite is not duplicated on one screen.** `.side__invite` (header) shows only below
-  900px; `.side__foot-invite` (in the panel) is `display: none` there and only appears in the
-  desktop sidebar. Five `oauth2/authorize` links in the DOM (the fifth is the `#pricing`
-  bottom CTA), never more than four visible at once.
-- **Without JS the toggle is hidden**, since it couldn't do anything, and the footer is the
-  fallback — `.foot__nav` carries all eight tab destinations (six before `#pricing` 2026-09-04,
-  seven before `#why-musaed` 2026-09-05) for exactly this case. Add a tab and you must add a
-  footer link, or no-JS phones lose it.
-- **Escape closes and returns focus to the toggle; an outside tap closes; crossing 900px with
-  it open clears `is-open`** — otherwise a rotation leaves the class set on a sidebar that no
-  longer has a panel.
-- **The panel caps at `min(70dvh, 560px)` and scrolls internally**, so a short phone in
-  landscape cannot end up with a menu taller than the screen.
-
-## The command filter and the versus switch
-
-Two near-identical toggles, both reusing `.filters` / `.filter` and both hidden by
-`.no-js .filters` because everything they toggle is rendered anyway.
-
-- **`initFilters()`** — the `#commands` category chips. `[data-filter]` buttons show/hide
-  `[data-cat]` rows inside `[data-cmds]`; `[data-cmds-empty]` appears if a category is empty.
-- **`initVersus()`** — the `#why-musaed` bot switcher (MEE6, Dyno). `[data-vs]` buttons toggle
-  `hidden` on `[data-vs-panel]` blocks (`.vs`), one visible at a time; the first button's
-  target is applied on load. No `.reveal` inside the `.vs` blocks — they're shown by a click
-  after the reveal observer has already passed them, so an animated-in block would stay at
-  `opacity: 0`. `refreshReveals()` only runs on *panel* activation, not on a versus switch.
-  Adding a third comparison (e.g. an Arabic rival) is one more button + one more `.vs` block,
-  no JS change.
-
-Neither function touches the tab router. Adding a third toggle of this shape means a third
-`initX()` and a matching `.no-js .filters` group — do not fold them into one generic helper
-unless all three genuinely share behaviour.
-
-## Phone layout, generally
-
-- **`.app` uses `minmax(0, 1fr)`, never `1fr`.** A grid item's automatic minimum is its
-  min-content width, so the nav sized the whole column to 468px and pushed the page sideways
-  at every phone width. `.side` also carries `min-width: 0` for the same reason. Measured at
-  320/375/390/412px, not guessed. This bit with the scrolling tab strip and would bite again
-  with any wide child.
-- **The desktop `.topbar` is `display: none` on phones**; the header carries the invite and
-  the panel carries the dashboard link.
-- **Command rows stack below 700px.** The three-column grid
-  (`minmax(140px, 175px) 1fr auto`) only earns its columns when the description still has
-  room beside a fixed-width name; `.cmd`'s base state is a single column.
-- **Without JS the filter chips are hidden** (`.no-js .filters`), since all sixteen rows are
-  rendered anyway and the controls could not do anything. The same rule hides the
-  `#why-musaed` bot switcher (also `.filters`); its three `.vs` blocks then stack.
-- **320px still fits brand + invite + toggle on one row**, but only because `.side__invite`
-  sheds padding below 900px and again below 360px. That's the tightest thing on the page.
-
-## Motion
-
-Layer 1 (baseline) is the `IntersectionObserver`-driven `.reveal` staggering already covered
-in `docs/claude/design-and-invariants.md`. Layer 2 is progressive enhancement: native CSS
-scroll-driven timelines in one `@supports (animation-timeline: view())` block at the bottom
-of `styles.css`, skipped entirely outside Chromium 115+ / Safari 26+ (layer 1 carries the
-page fine on its own there).
-
-| Effect | Timeline | What it does |
+| What | URL | Where it's used |
 | --- | --- | --- |
-| `hero-glow` | (time) | the hero's radial glow breathes — not scroll-linked |
-| `glow-drift` | `scroll(root)` | hero glow parallaxes over the first viewport height |
-| `caret-blink` | (time) | terminal caret beside the sidebar wordmark |
-| `status-pulse` | (time) | the "البوت شغّال" dot in the desktop topbar |
-| `faq-in` | (time) | FAQ answer fades in when its `<details>` opens |
+| Bot invite | `https://discord.com/oauth2/authorize?client_id=1341863717247258655&permissions=8&integration_type=0&scope=bot+applications.commands` | Every "Add" button (landing and legal pages), the Free plan, footer "Invite" |
+| Dashboard login | `https://dashboard.musaed.dev/auth/login` | Nav, mobile menu, dashboard section, footers, FAQ answer 2 |
+| Support server | `https://discord.gg/CcwRT6K5qv` | Footers, FAQ answer 5 |
+| Privacy / Terms | local `privacy.html`, `terms.html` (canonical `https://musaed.dev/privacy.html`, `/terms.html`) | Landing footer, legal-page nav |
+| Canonical / OG image | `https://musaed.dev/`, `https://musaed.dev/assets/Pics/musaed-banner.png` | `<head>` on every page |
+| Contact email | Obfuscated with HTML entities inside the legal pages | Legal pages only. Keep the obfuscation. |
 
-**This list shrank from five scroll-driven effects to one on 2026-08-25**, because four of
-them targeted chrome the rebuild removed: `progress-grow` and `nav-solidify` belonged to the
-old sticky nav bar (there is no read-progress line and no translucent-until-scrolled bar any
-more), and `hero-recede`/`hero-drift` scrubbed the hero copy and the `.wordmark` block as the
-hero exited — but panels are now roughly one screen and the hero no longer exits under a
-following section. `glow-drift` survives because it still has a viewport-height of scroll to
-work against. Note it composes with `hero-glow` on the same element via a two-value
-`animation-timeline: auto, scroll(root block)`.
+**Live stats:** `GET https://dashboard.musaed.dev/api/public/stats` returns
+`{ guild_count, member_count, status, updated_at }`.
 
-Two constraints still hold: don't scrub body copy or cards (scrubbed text fades back out as
-you scroll up, which is distracting to read against — scrubbing is for effects where being
-tied to scroll position is the actual point), and never put a scroll-linked animation on an
-element that also carries `.reveal` — they fight over `transform`
-(`docs/claude/design-and-invariants.md`).
+- `main.js` (`liveStats`) fetches it at most once every 5 minutes. It caches the response in
+  `sessionStorage['musaed:stats']`, and after a failure or 429 it backs off for 15 minutes (it
+  honours `Retry-After`).
+- On success it shows the hero line "يحمي N سيرفر وM عضو الحين" / "Protecting N servers and M
+  members right now", plus the footer status "البوت شغال" / "Bot is online" (a red dot if the
+  status isn't `up`).
+- Both stay `hidden` until real data arrives. Numbers are never faked.
+- **CORS only allows `https://musaed.dev`.** Opened from `file://`, `localhost`, or another
+  host, the fetch is blocked (a CORS error in the console) and the stats simply don't show —
+  this is expected during local testing, not a bug.
+- **Testing locally:** seed the cache, then reload:
+  `sessionStorage.setItem('musaed:stats', JSON.stringify({at: Date.now(), data: {guild_count: 21, member_count: 2307, status: 'up'}}))`
 
-## Brand assets and the Discord mark
+## Legal pages
 
-| File | Size | Used as |
-| --- | --- | --- |
-| `musaed-avatar.png` | 1024×1024 | brand mark in nav/footer (30px) and legal-page bars (25px); also `apple-touch-icon` |
-| `musaed-favicon.png` | 512×512 | `rel="icon"` on every page |
-| `musaed-banner.png` | 960×540 | the `og:image`/Twitter card image on every page. `1200×630` is the size every platform actually optimises for — worth regenerating at that size, but not currently a placeholder |
+- **The wording is word for word identical** to the pages that existed before this rebuild —
+  diffed by hand during integration (headings, contents list, every paragraph, the obfuscated
+  `mailto:` entities, `<bdi>` and `<code dir="ltr">`). Only the markup and layout around it
+  changed.
+- **To update a policy,** change the text and also the `آخر تحديث` date in the hero chip. If
+  you change any section IDs, update the contents list to match.
+- **Layout:**
+  - Sticky top bar with brand, Home, Privacy, Terms and the invite button; the current page is
+    marked with `aria-current="page"`.
+  - Mint reading-progress bar across the top.
+  - Hero with the grid background, title, last-updated chip, "This page is available in
+    Arabic." chip, and the opening paragraph.
+  - The contents list is a sticky numbered sidebar from 1024px up (on the right, because the
+    page is right-to-left). Below that it becomes a sticky chip bar that scrolls sideways.
+  - `legal.js` highlights the current section in the contents list.
+  - The body is limited to 72ch with 2.0 line height, list items are shown as cards, and the
+    end of each page has a "اقرأ بعدها" card linking to the other page. A back-to-top button
+    appears after 700px of scrolling.
 
-Both marks are fully transparent outside the glyph. Don't scale past ~50px, where upscaling
-starts to show.
+## Accessibility and motion
 
-`assets/Pics/Discord-Icon.png` (100×100, transparent) renders in the **6** places
-`docs/claude/design-and-invariants.md` counts, all on `index.html`:
+- The pages have skip links, visible `:focus-visible` rings, 44px touch targets, and switches
+  built as `role="switch"` + `aria-checked`. The stepper and radio group are labelled. Every
+  decorative animation carries `aria-hidden`, and the join-gate demo has an `.sr-only` text
+  description.
+- **Reduced motion:** `prefers-reduced-motion` turns animations off and shows a meaningful
+  static end state: the logo is filled and the underline drawn; the gate demo shows fixed
+  counters and one reason per gate; the ticker wraps instead of scrolling; the finale word is
+  fully filled; the DM counter shows 642.
+- Without JS, all content stays visible (in English on the landing page — a `<noscript>` fix
+  for this is still open, see root `CLAUDE.md` "Next goals").
 
-| Where | Class | Size |
-| --- | --- | --- |
-| `ضيف البوت` CTA, sidebar footer (`.side__foot-invite`, desktop only) | `.btn__logo` in `.btn--sm` | 16px |
-| `ضيف البوت` CTA, phone header (`.side__invite`, phone only) | `.btn__logo` in `.btn--sm` | 16px |
-| `ضيف البوت` CTA, desktop topbar | `.btn__logo` in `.btn--sm` | 16px |
-| `ضيف البوت` CTA, hero | `.btn__logo` | 18px |
-| `ادخل سيرفرنا` CTA, community panel | `.btn__logo` in `.btn--sm` | 16px |
-| `سيرفر مساعد` community panel icon | `.community__logo` | 44px |
+## Gotchas found while building (carried from the original working-folder notes)
 
-**It was 5 before the 2026-08-25 rebuild**; the extra one is the phone-header invite.
-`.side__foot-invite` and `.side__invite` are mutually exclusive by media query, as are
-`.side__invite` and the topbar's, so a visitor sees **3 invite buttons on desktop** (sidebar,
-topbar, hero) and **2 on a phone** (header, hero) — six marks in the DOM, never six on
-screen. If you add a fourth invite, check it does not become a second one visible at the
-same width.
+- **Never name a state class `scan`.** `.scan` is the hero's sweeping scan-line. The gate demo
+  uses `.scanning` and `.deny` on stations; reusing `.scan` once threw the Age gate station
+  out of the panel.
+- **Don't use `-webkit-text-stroke` or semi-transparent fills on big Alexandria text.** It is a
+  variable font with overlapping contours, which show as inner lines or darker overlaps. Use
+  solid colours (as `.layer-n` and `.nf-code` do) or `background-clip: text` (as `.finale-ar`
+  does).
+- **Don't use `<fieldset>` as a flex row.** Legends don't lay out as flex items. The dashboard
+  uses `div[role="radiogroup"]` with `aria-labelledby`.
+- **`.card` sets `display: flex` after the bento media queries.** Layout overrides for a
+  specific card need higher specificity, e.g. `.bento .card.c-dms`.
+- **Positioning the gate tokens:** tokens are absolutely positioned inside `.track`, and each
+  move target is computed from the station `.node`'s bounding box. That makes horizontal,
+  vertical, LTR and RTL layouts work without separate code.
+- **Where the ready classes live:** `body.ready` (added two frames after boot) triggers the
+  hero entrances. `.reveal` elements get `.in` from an IntersectionObserver.
+- **Grid items and wide children:** a single-column grid holding a horizontally scrolling
+  child needs `grid-template-columns: minmax(0, 1fr)` and `min-width: 0` on its children.
+  Without them, the legal pages' chip bar could stretch the page sideways on phones.
+- **Don't use `scrollIntoView` to centre a chip in a sticky bar.** It can scroll the whole
+  page. `legal.js` uses `list.scrollBy({ left: … })` instead.
+- **Mono font and Arabic:** IBM Plex Mono has no Arabic glyphs. Readex Pro must stay second in
+  `--f-mono`, or Arabic mono labels fall back to a stretched system font.
 
-White via `filter: brightness(0) invert(1)` on the blurple CTAs (Discord's own treatment on
-a blurple field); left at natural colour on the dark community panel, which clears 7.2:1
-there unaided.
+## Verifying changes
 
-**Why two accent colours at all.** The primary CTAs are Discord blurple because every one of
-them leads to Discord (three `ضيف البوت` + `ادخل سيرفرنا`) — colouring by destination reads
-as "this goes to Discord," the same convention as a "Sign in with Google" button carrying
-Google's colours. `#5a63d8` is deliberately deeper/less saturated than Discord's own
-`#5865f2` (not an exact brand match), white label at 4.99:1, rising to 6.05:1 on the
-`#4e56c6` hover fill. Everything else stays green — see `docs/claude/design-and-invariants.md`
-for the scoping rule (`.btn--primary` only) and the current `var(--accent)` usage count.
+There is no test suite. Check in a real browser at 1440px and 390px wide, in both languages
+(`?lang=ar` / `?lang=en`), plus `privacy.html`, `terms.html` and `404.html`. Check that:
 
-## The stats placeholder, in implementation terms
+- the console has no errors (the stats CORS error is expected off `musaed.dev`);
+- nothing scrolls sideways (`scrollWidth === clientWidth`);
+- the gate demo runs;
+- the dashboard preview reacts to the controls;
+- the command search filters;
+- the legal contents list highlights while scrolling.
 
-The three values live in one `STATS` object at the top of `assets/js/main.js`:
-
-| Key | Kind | Rendered as | Section label |
-| --- | --- | --- | --- |
-| `servers` | `int` | grouped, e.g. `1,284` | سيرفر يشغّل مساعد |
-| `members` | `int` | grouped, e.g. `418,930` | عضو داخل هالسيرفرات |
-| `uptime` | `percent` | one decimal, e.g. `99.4%` | نسبة التشغيل خلال 30 يوم |
-
-To wire a real endpoint: set `var STATS_ENDPOINT = "https://<your-public-api>/v1/stats";`
-(currently `null`, `docs/claude/placeholders-and-domain.md`) and adjust `shapeStats()` to match the payload's field names — nothing
-else needs editing. The rate-limiting path already written around it:
-
-| | Behaviour | Constant |
-| --- | --- | --- |
-| Throttle | at most one request per tab per window; repeats/reloads inside it serve from cache | `STATS_TTL_MS`, 5 min |
-| Backoff | a 429 or failure parks further requests, honouring `Retry-After` when sent | `STATS_BACKOFF_MS`, 15 min |
-| Fallback | any failure keeps the last good values, or the placeholders if there was never a good response | |
-
-`readStats()` always resolves, never rejects. The cache is `sessionStorage` under
-`musaed:stats` — aggregate counts only, no identifiers, cleared when the tab closes, every
-access wrapped in `try/catch` since private-mode browsers can throw (throttle degrades to
-per-pageload if storage is unavailable rather than breaking).
-
-## Vendored fonts
-
-IBM Plex Sans Arabic and IBM Plex Mono, SIL Open Font License 1.1, subset `.woff2` files
-taken from Fontsource. Icon sourcing is covered in `docs/claude/design-and-invariants.md` —
-same file, don't duplicate the process description here.
+**Headless check (Windows, Node 22+ for global `fetch`/`WebSocket`, Chrome DevTools Protocol
+over `--remote-debugging-port`).** Edge is typically at
+`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe` on a Windows dev machine;
+headless `--window-size` can't go narrow enough for phone widths, use
+`Emulation.setDeviceMetricsOverride` instead. This is how the 2026-09-24 integration was
+smoke-tested (zero console errors, no sideways scroll, correct titles, both languages, both
+widths, all four pages) — see root `CLAUDE.md` "Next goals" for what that check did **not**
+cover (clicking through the interactive pieces by hand).

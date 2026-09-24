@@ -1,5 +1,11 @@
 # Copy accuracy — the site describes a real bot
 
+> **Stale as of the 2026-09-24 rebuild.** This file's *principle* (every feature claim must
+> match the bot's real code) still holds, but its specifics — panel names, section IDs, the
+> `#why-musaed` comparison content, exact command counts tied to the old tabbed layout — were
+> written for the design that no longer exists. Check `docs/claude/implementation-reference.md`
+> and the actual source files before trusting a specific claim here. Not yet rewritten.
+
 The statistics are invented. **Everything else must stay true to the bot.** A page listing a
 command the bot does not answer to is worse than one listing nothing.
 

@@ -5,36 +5,64 @@ Orientation for an AI agent picking this repo up — read this before you touch 
 run it) and is not a technical reference — don't look there for history, reasoning, or
 implementation detail.
 
-**The landing page was rebuilt on 2026-08-25** from a supplied design mockup: it is now a
-sidebar + tab panels rather than one long scrolling page. Same content, same URLs — the
-tabs are real anchors and every old `#features`/`#commands`/`#trust`/`#about`/`#about-us`
-deep link still resolves. See `docs/claude/implementation-reference.md` for the panel map.
-**Eight panels as of 2026-09-05.** `#pricing` joined the original six on 2026-09-04 (Free/Pro
-numbers from `core/plans.py`, still **no numeric Pro price**). The Pro CTA pointed at the
-dashboard's `/pricing/get-pro` upgrade route from 2026-09-05 until 2026-09-17, when it was
-turned back into a "not available yet" popup — see "Shipped 2026-09-17" below; that upgrade
-flow never charges anyone and sending visitors to it read as a live purchase button. `#why-musaed` ("ليش مساعد؟") joined 2026-09-05 — a
-competitor-comparison panel sitting **after `#faq`** (late-funnel), with a `.filters`-style
-switcher (MEE6 / Dyno), driven by `initVersus()` in `main.js` — the switch replays a CSS
-cascade-in (`vs-in` keyframe in `styles.css`, added 2026-09-05; opacity/transform only,
-flattened by the reduced-motion block). It states claims about **other** bots, so it
-carries the same accuracy burden as `#commands` — see `docs/claude/copy-accuracy.md`.
-Several counts in `docs/claude/testing-and-traps.md` were pinned at six and are now stale
-until the measurement suite is rerun — read that file's own note before trusting a number
-in it.
+**The site was completely rebuilt on 2026-09-24.** This was not an incremental edit — it
+replaces the previous sidebar-plus-tab-panels design (eight/nine-panel `index.html`, separate
+`assets/css/styles.css` written for that layout) with a different landing page built
+independently by the owner in a separate working folder ("the gatekeeper" redesign) and then
+brought into this repo, in this same batch of changes, to keep it under version control. Read
+`docs/claude/implementation-reference.md` for the full technical reference — sections, brand
+tokens, the i18n system, gotchas, content rules, real links/live data, legal-page structure,
+accessibility and how to verify changes. It is detailed and accurate as of this rebuild;
+treat it as the primary implementation doc going forward.
 
-**Nine systems as of 2026-09-14.** The honeypot trap channel (`قناة الفخ`) — live bot-side
-since 2026-08-16, no longer pilot-gated since 2026-08-18 — shipped on the site: a `#features`
-card, a `#dashboard-features` row (no slash commands), and the systems count moved 8 → 9
-everywhere it was stated (hero fact, `#features` lede, `llms.txt`, `pricing.txt`). See
-`docs/claude/copy-accuracy.md` for the full record and what the card copy does and doesn't
-claim about what the trap catches.
+**Bilingual now — this is a deliberate reversal of the old Arabic-only rule.** Arabic is
+still the default and primary language (loads first, matches the bot's own voice), but
+English is a genuine one-click toggle (`main.js`/`i18n.js`), not a translation afterthought.
+See Hard Rule 6 below — it changed to reflect this.
 
-**This file was split on 2026-08-25 into this slim root plus `docs/claude/*.md` files.**
-Root keeps only identity, the hard rules, and the "Where to find things" table below.
-Everything else — the detailed reference material, the change history, the per-feature
-reasoning — moved into `docs/claude/`. Use the table to find the right file before you go
-looking for something that used to live in this file directly.
+**What reversed from the previous design, so you don't assume continuity that isn't there:**
+- The `#why-musaed` MEE6/Dyno comparison panel is **gone entirely** — not just off the nav,
+  removed from the page. The old CLAUDE.md called keeping it as a single tab "Settled — do
+  not reopen"; the rebuild reopened it by replacing the whole page. If comparison content is
+  wanted again, that's a new decision, not a restore.
+- The `#pricing` panel's numeric Free/Pro breakdown (the six-figure table pulled from
+  `core/plans.py`) is gone from the page itself. The new `#plans` section shows Free's
+  features as plain bullets and Pro as a non-clickable **"Coming soon"** pill — no numbers,
+  no dashed-border CTA, no link to `dashboard.musaed.dev/pricing/get-pro` (that route was
+  already turned into a "not available yet" modal on 2026-09-17; the new design goes further
+  and doesn't link to it at all). `pricing.txt` still carries the granular numeric limits
+  from the bot's real plans table as a machine-readable detail beyond what the page itself
+  shows now — see "SEO/AI-facing files" below.
+- The systems count ("9 أنظمة") is no longer stated anywhere on the page. The new `#protection`
+  section has four layers (age gate, captcha, honeypot, automod) and `#toolkit` has six cards
+  (tickets, shortcuts, auto-responses, welcome, mod logs/`/lookup`, member DMs). Don't
+  reintroduce a "9 systems" claim without checking it still matches the bot's actual feature
+  set (`docs/claude/copy-accuracy.md`'s underlying facts may still be right — its specific
+  panel/count claims are not, see the staleness note there).
+
+**What carried over unchanged:** brand colors (`--accent: #0fe37d`, dark-only background
+scale), the invite link and its `permissions=8` scope, the dashboard login URL, the support
+server link, and — word for word, diffed against the previous versions — the full text of
+`privacy.html` and `terms.html`. Only their layout changed (sticky table-of-contents sidebar
+on desktop / horizontal chip bar on phones, a reading-progress bar, `legal.css`/`legal.js`).
+
+**Fonts are now self-hosted, not loaded from Google Fonts.** The owner's original build (in
+the separate working folder) loaded Alexandria, Readex Pro and IBM Plex Mono from
+`fonts.googleapis.com`/`fonts.gstatic.com` — that both violates Hard Rule 5 below and would
+have contradicted `privacy.html`'s "only two outside services" claim. As part of bringing it
+into this repo, all three families were vendored as `.woff2` under `assets/fonts/`
+(`alexandria-arabic/latin.woff2`, `readexpro-arabic/latin.woff2`, `plex-mono-400/500.woff2`),
+with matching `@font-face` rules at the top of `assets/css/styles.css`, and every Google
+Fonts `<link>` removed from all four HTML pages. The previous design's font files
+(`plex-arabic-*.woff2`, `plex-latin-*.woff2` — IBM Plex Sans Arabic, unrelated to Alexandria/
+Readex Pro) were deleted since nothing references that family anymore.
+
+**JSON-LD was ported forward, not carried over verbatim.** The previous `index.html` had an
+`Organization`/`WebSite`/`SoftwareApplication`/`FAQPage` `@graph`. The new `index.html` has
+the same four nodes, rebuilt to match this page: `SoftwareApplication.description` and
+`featureList` reflect the new copy, and `FAQPage.mainEntity` mirrors the new page's six
+`#faq` questions word-for-word (same discipline as before — **edit a FAQ answer in `i18n.js`
+and `index.html`, and you edit the JSON-LD too**).
 
 **This file is committed to a public GitHub repo.** Do not put deployment internals in it —
 no infrastructure identifiers, no environment variable names, no bot-side table or module
@@ -45,52 +73,38 @@ names, no server IDs. That rule applies to everything you write into this repo.
 ## 1. What this is
 
 A **static public marketing site** for **مساعد (Musaed)**, an Arabic (Saudi dialect)
-moderation/automod Discord bot. Three pages, one of them an eight-panel tabbed page. It
-explains the bot to server owners before they add it.
+moderation/automod Discord bot, bilingual with English as a toggle. Three pages: a
+long-scrolling `index.html` (thirteen sections, real anchors — nav links, footer links and
+the FAQ all point at `#protection`, `#toolkit`, `#dashboard`, `#commands`, `#plans`, `#faq`
+etc.), plus `privacy.html` and `terms.html`. It explains the bot to server owners before
+they add it.
 
 It is **not** a dashboard, and nothing on it manages anything or shows real guild data —
-this repo itself has no login state, no account, no backend. The two «لوحة التحكم» buttons
-(sidebar + topbar) are plain outbound links to the dashboard's own OAuth2 flow, a **separate
-application on a separate origin** (see `docs/claude/dashboard.md`) — same category of link
-as the Discord bot-invite buttons, not auth scaffolded in this repo. They pointed at a local
-`connect.html` interstitial until 2026-08-25; that page was removed (`docs/claude/page-notes.md`)
-and they now link straight to the dashboard, which serves its own pre-OAuth disclosure.
+this repo itself has no login state, no account, no backend. The nav's "دخول اللوحة"/"Log in"
+link and the dashboard-preview section's CTA are plain outbound links to the dashboard's own
+OAuth2 flow, a **separate application on a separate origin** (see `docs/claude/dashboard.md`)
+— same category of link as the Discord bot-invite buttons, not auth scaffolded in this repo.
 
 ```text
-index.html                 landing page: 8 tab panels + inline icon sprite (24 symbols) + a JSON-LD @graph in the head
-404.html                   custom error page, served by Caddy - see docs/claude/testing-and-traps.md
+index.html                 landing page: 13 sections, inline icon sprite (SVG symbols), a JSON-LD @graph, bilingual (ar default, en toggle)
+404.html                   custom error page, served by Caddy, no JS, Arabic-first with an English line
 privacy.html               privacy policy   } same layout, one shared
-terms.html                 terms of use     } stylesheet, NO JavaScript
-google82b70d7af988f7a9.html  Google Search Console site-verification file - see docs/claude/page-notes.md
-sitemap.xml                lists all 3 real pages (not 404.html) - see docs/claude/placeholders-and-domain.md
-robots.txt                 Allow: / for everyone, points at sitemap.xml - see docs/claude/placeholders-and-domain.md
-llms.txt                   plain-text overview for AI systems (llmstxt.org format) - added 2026-09-05
-pricing.txt                machine-readable pricing for AI agents; MIRRORS the #pricing panel's numbers - added 2026-09-05
-assets/css/styles.css      tokens, reset, shared components. Linked as ?v=N - bump on change, see docs/claude/git-and-deploy.md
-assets/css/legal.css       BOTH legal pages, loaded after styles.css. Also ?v=N
-assets/js/main.js          tab router (+ per-tab <title>), command filter, versus switch, scroll reveals, stats data + count-up, link guard. Linked as ?v=N
-assets/fonts/              self-hosted woff2 (IBM Plex Sans Arabic + Plex Mono)
-assets/Pics/               brand marks. Capital P — Linux hosts are case-sensitive
+terms.html                 terms of use     } stylesheet + legal.css, legal.js drives the reading-progress bar and TOC highlighting
+google82b70d7af988f7a9.html  Google Search Console site-verification file
+sitemap.xml                 lists all 3 real pages (not 404.html)
+robots.txt                  Allow: / for everyone, points at sitemap.xml
+llms.txt                    plain-text overview for AI systems (llmstxt.org format) — updated 2026-09-24 for the rebuild
+pricing.txt                 machine-readable pricing for AI agents; more detailed than the on-page #plans card now — updated 2026-09-24
+assets/css/styles.css       @font-face rules + tokens, reset, every component. Linked as ?v=5 — bump on change
+assets/css/legal.css        privacy.html/terms.html only, loaded after styles.css. ?v=2
+assets/js/main.js           language switch, live stats, nav, join-gate demo, reveals, stacked protection cards, dashboard preview, command search, scroll-linked effects. ?v=3
+assets/js/i18n.js           the Arabic dictionary, bilingual runtime strings (dyn), join-gate demo accounts, the slash-command list. ?v=1
+assets/js/legal.js          privacy.html/terms.html only: reading-progress bar, TOC highlighting, back-to-top. ?v=1
+assets/fonts/                self-hosted woff2: Alexandria + Readex Pro (arabic/latin subsets), IBM Plex Mono (400/500)
+assets/Pics/                 brand marks, including the new musaed-favicon.svg. Capital P — Linux hosts are case-sensitive
 ```
 
-Three pages, two stylesheets, one script. **Zero dependencies, zero build step.** There used
-to be more: `developer.html` was removed along with its CSS and JS, and do not resurrect it.
-`updates.html` (the changelog) was removed on 2026-08-25 along with `assets/css/updates.css`
-— see `docs/claude/page-notes.md` for the full removal record, and the notes on the Google
-verification file, `#stats` being hidden, and the legal pages' no-JS rule.
-
-**`#pricing` shipped 2026-09-04** — a seventh tab, not a new page (see the two paragraphs
-above). It states the real Free/Pro figures (pulled from `core/plans.py`'s `PLANS` table in
-the bot repo — re-read that fresh before ever touching a number on this panel, a retuned
-figure there moves every guild on that plan and a stale copy here would misstate what a
-customer gets) and still shows **no numeric Pro price** — `.plan__price--pending` renders
-"يُعلن قريبًا" and the panel carries no figure. The Pro CTA (`.btn--accent`, "ترقّى لبرو")
-points at `https://dashboard.musaed.dev/pricing/get-pro` as of 2026-09-05 — a first-party
-outbound link to the dashboard's own upgrade flow, same category as the «لوحة التحكم» links,
-not billing scaffolded here. It replaced an earlier Discord "contact the team" link from when
-no upgrade route existed. Whoever sets a real price fills in `.plan__price--pending` then.
-Early Access is deliberately not listed as a Pro perk — it grants no higher limits and its
-own copy says its features may vanish or turn paid.
+Three pages, two stylesheets, three scripts. **Zero dependencies, zero build step.**
 
 ---
 
@@ -112,20 +126,31 @@ because nothing below is about it. Do not weaken a rule here to make dashboard w
 4. **Never scaffold login, auth, or protected routes *in this repo*.** There is no logged-in
    state on the marketing site at all. Auth belongs to the dashboard
    (`docs/claude/dashboard.md`), which lives elsewhere — not behind a flag here.
-5. **Keep it dependency-free and build-free.** Fonts and icons are vendored. If you need
-   tooling (a headless browser to test with), install it *outside* this repo.
-6. **All user-facing copy is Saudi-dialect Arabic. All code comments and placeholder markers
-   are English.**
-7. **Every invented number is marked in-code** so it is trivial to find and replace.
-8. **Keep `CLAUDE.md` current with every commit.** Any change that adds or removes a panel,
-   moves a number, changes a rule, or opens or closes a goal updates this file (and any
-   affected `docs/claude/*.md`) as part of the same batch of commits — same commit or an
+5. **Keep it dependency-free and build-free.** Fonts and icons are vendored — no CDN font
+   links (Google Fonts included), even for a quick prototype. If you need tooling (a headless
+   browser to test with), install it *outside* this repo.
+6. **Arabic is the default and primary language; English is a genuine toggle, not scope
+   creep.** This reverses the old "Arabic-only" rule — the 2026-09-24 rebuild made the site
+   bilingual on the owner's design, and that stands. What still holds: all *Arabic* copy is
+   Saudi-dialect ("وش", "تبي", "على طول", "الحين" — see `docs/claude/implementation-reference.md`
+   §Language), all code comments and placeholder markers are English, and the legal pages
+   (`privacy.html`/`terms.html`) stay **Arabic-only** — don't add an English translation of
+   them without the owner's explicit sign-off (see that doc's "Open items").
+7. **Every invented number is marked in-code** so it is trivial to find and replace. There
+   are none left as of this rebuild — the only figures on the page are the bot's real invite
+   permissions, and the live server/member count fetched from the dashboard's public stats
+   endpoint (hidden until real data arrives, never faked; see
+   `docs/claude/implementation-reference.md` §"Real links and live data").
+8. **Keep `CLAUDE.md` current with every commit.** Any change that adds or removes a
+   section, moves a number, changes a rule, or opens or closes a goal updates this file (and
+   any affected `docs/claude/*.md`) as part of the same batch of commits — same commit or an
    adjacent one, never left for "later". Someone reading only this file should never be
    behind the code.
 
-If live numbers are ever needed, they must come from a **separate, purpose-built public
-aggregate endpoint** — never per-server rows, never member identities. The seam already
-exists; see `docs/claude/placeholders-and-domain.md`.
+If live numbers are ever needed beyond what's already wired, they must come from a
+**separate, purpose-built public aggregate endpoint** — never per-server rows, never member
+identities. That seam now exists and is live (`STATS_ENDPOINT` in `assets/js/main.js`); see
+`docs/claude/implementation-reference.md`.
 
 ---
 
@@ -133,15 +158,10 @@ exists; see `docs/claude/placeholders-and-domain.md`.
 
 | About to… | Read |
 | --- | --- |
-| touch CSS/JS/markup and need anchor names, phone-menu behavior, motion effects, brand assets, or the stats-fetch implementation | `docs/claude/implementation-reference.md` |
-| work on anything dashboard-adjacent (auth, settings writes, per-guild data) | `docs/claude/dashboard.md` |
-| edit `#commands` or `#features`, or check the bot's command surface hasn't drifted | `docs/claude/copy-accuracy.md` |
-| touch CSS/design tokens, or need the "don't accidentally break this" checklist | `docs/claude/design-and-invariants.md` |
-| check the stats placeholder, the invite URL, or do a domain move | `docs/claude/placeholders-and-domain.md` |
-| test/verify a change, or want the list of known testing/deploy gotchas | `docs/claude/testing-and-traps.md` |
-| commit and push (and the commit checklist / CLAUDE.md-first rule), or verify a deploy actually went live | `docs/claude/git-and-deploy.md` |
-| pick up open work, plan growth/distribution, or check what's still owed | `## 4. Next goals` below + `.agents/*` (gitignored, local-only) |
-| need the history behind the Google-verification file, the `updates.html` removal, `#stats` being hidden, or why the legal pages load no JS | `docs/claude/page-notes.md` |
+| touch any part of the current implementation — section anchors, the i18n system, brand tokens, motion, the join-gate demo, real links/live stats, legal-page structure, accessibility, or how to verify a change | `docs/claude/implementation-reference.md` — accurate as of the 2026-09-24 rebuild |
+| work on anything dashboard-adjacent (auth, settings writes, per-guild data) | `docs/claude/dashboard.md` — unaffected by the rebuild, still accurate |
+| pick up open work, or check what's still owed from the rebuild | `## 4. Next goals` below |
+| check something in `docs/claude/copy-accuracy.md`, `design-and-invariants.md`, `git-and-deploy.md`, `page-notes.md`, `placeholders-and-domain.md`, or `testing-and-traps.md` | **Read the banner at the top of that file first.** They describe the pre-2026-09-24 tabbed-panel implementation in detail — section IDs, CSS custom-property counts, `grep` counts for the old invite/link occurrences — almost all of which no longer match. They're kept for history, not as a current reference. A proper rewrite of each is still open work (see below). |
 
 ---
 
@@ -162,183 +182,50 @@ Never truncate code with placeholders or `// ... rest unchanged`.
 
 ## 4. Next goals — what to pick up
 
-Ordered roughly by priority. Open as of 2026-09-05. The growth work is tracked in `.agents/`
-(gitignored, **local-only — a fresh clone won't have these files**; ask the owner for them
-if missing): `directory-tracker.csv` (18 listing targets; **top.gg is live as of ~2026-08-29**,
-the rest not submitted), `directory-listings-copy.md` (Arabic-first listing copy,
-paste-ready), `product-marketing.md` (positioning, voice, goals).
+Open as of 2026-09-24, right after the rebuild landed in this repo.
 
-**Primary objective (owner's, from `product-marketing.md`): adoption, not revenue.**
-Target is 50 servers using Musaed; the current count lives in the gitignored docs, not here.
-The site's job in that funnel is the "ضيف البوت" conversion and the directory long tail.
+### Open — carried from the rebuild's own handoff notes
 
-### Open — the agent can do these
+1. **Not yet deployed.** This swap put the new site in the working tree and (once committed)
+   git history, but nobody has pushed it live at `musaed.dev` yet. That's the owner's call —
+   don't deploy without being asked.
+2. **English legal pages** — only if the owner wants them and will review the translation.
+   `privacy.html`/`terms.html` stay Arabic-only until then (Hard Rule 6).
+3. **When Pro actually launches:** replace the `#plans` "Coming soon" ribbon/pill with a real
+   CTA, and update `plans.ribbon`, `plans.proCta` and FAQ 5 in both languages (English inline
+   in `index.html`, Arabic in `assets/js/i18n.js`) — and the matching FAQ entry in
+   `index.html`'s JSON-LD `@graph`.
+4. **A `<noscript>` fallback is still missing.** Without JS, `index.html` shows its English
+   source text inside a right-to-left layout — a real rough edge, not fixed by this
+   integration.
+5. **Invite permissions** are still `permissions=8` (Administrator) — unchanged from before
+   the rebuild. If asked to "clean this up" to a least-privilege set, confirm with the owner
+   first; a previous session recorded this as a deliberate choice, not drift.
 
-1. **Brand voice — deeper pass still open.** `product-marketing.md` calls for "friendly,
-   warm, made for your people". `#why-musaed` (2026-09-05) and a first light pass on the
-   hero / `#about` / `#features` / `#trust` ledes + two FAQ answers (merged 2026-09-05) are
-   done. Still deadpan: the `#features`/`#trust` **card bodies**, the `#commands` and
-   `#dashboard-features` prose, most FAQ answers. Warm the framing, leave the spec concrete
-   (the `#why-musaed` principle); legal pages stay neutral.
-2. ~~Arabic directory research.~~ **Done 2026-09-05.** Findings in `directory-tracker.csv`
-   (now 27 rows) and `product-marketing.md` v4: no standalone Arabic bot-directory sites
-   exist; Arabic discovery = the `arabic`/`arabic-language` tags on the big lists, Arabic
-   tech-blog roundups (مجنون كمبيوتر, سماعة تك, Khamsat), Arabic YouTubers, and Disboard
-   bot-list servers. "Saudi bot" ≈ صقر بوت / SaqrBot. Submitting the listings is still the
-   owner's job.
+### Open — from bringing the rebuild into this repo
 
-### Leave alone unless asked
+6. **The six stale `docs/claude/*.md` files need a real rewrite pass**, not just the
+   staleness banners they got in this batch. Each one currently describes the pre-rebuild
+   implementation in detail (old section IDs, old CSS class names, `grep` counts that no
+   longer hold). `docs/claude/implementation-reference.md` is the one exception — it was
+   replaced outright with accurate reference material for the current build.
+7. **`README.md` and `docs/claude/dashboard.md`'s "sequencing" note weren't re-checked in
+   depth.** `README.md` looked generic enough not to need edits on a skim; `dashboard.md`
+   still frames the live-stats endpoint as a "first step yet to be wired" — it's already
+   wired in `assets/js/main.js`, so that framing needs a line fixing next time someone is in
+   that file, even though its core architecture content is unaffected by the rebuild.
+8. **Verification so far: automated only.** A headless-Edge check (both languages, 1440px
+   and 390px, all four pages) showed zero console errors, no sideways scroll, correct
+   per-page/per-language `<title>`, and fonts rendering from the new self-hosted files —
+   screenshots were reviewed and matched expectations. What was **not** done: clicking
+   through the interactive pieces by hand (the join-gate demo's full run, the dashboard
+   preview's controls, the command search, the language toggle's live behavior, the legal
+   pages' TOC-highlight-while-scrolling). Do that before calling this fully verified.
 
-- **`#why-musaed` MEE6 rows** (`docs/claude/copy-accuracy.md`): `التحقق عند الدخول`
-  ("تحقق أساسي") and `السعر` ("مجاني محدود؛ ميزات كثيرة مدفوعة") arguably understate how thin
-  MEE6's free tier is after its paywall creep. The owner's 2026-09-05 pass did **not** touch
-  these — they are claims about another product and the current wording is defensible.
+### Settled — do not reopen without the owner
 
-### Shipped 2026-09-17
-
-- **`privacy.html` and `terms.html` got a PDPL compliance pass**, checked against the actual
-  law text (Personal Data Protection Law + its Implementing Regulation, official texts on
-  `laws.boe.gov.sa` and the Umm Al-Qura Gazette) rather than guessed at. `privacy.html` gained:
-  a stated legal basis for collection (consent or service-necessity, in the `#collect` intro),
-  a new `#breach` section committing to notify people if there's ever a security incident
-  (Implementing Regulation Article 24's 72-hour-to-SDAIA / "without undue delay"-to-the-person
-  duty — the page states the second half, not the 72h one, since that's owed to the regulator
-  not the visitor), a correction right added alongside access/deletion in `#rights` (PDPL
-  Article 4), an honest "independent project, one person, not a registered company" line
-  answering "who's the controller" (Article 13 — confirmed a natural person can lawfully be a
-  controller under Article 1(18), so this needed no legal-entity registration), and an
-  explicit "your data leaves Saudi Arabia" line in `#final` (Railway/Resend/Sentry are all
-  foreign-hosted — checked against Railway's own region list, none of its four regions are in
-  the Kingdom). `terms.html` gained: uploaded auto-response attachments folded into the
-  "your content, your liability" clause (`#your-content` used to cover text fields only), and
-  a stated consequence for violating `#acceptable-use` (access can be cut off, the bot pulled).
-  Also fixed two absolute "never shared with a third party" claims (here and in the
-  dashboard's own `/auth/connect` disclosure) that Sentry/Resend already made untrue — scoped
-  to "not for marketing" instead, naming the two vendors.
-- **The Get-Pro CTA on `#pricing` stopped linking out.** It used to send visitors straight to
-  the dashboard's `/pricing/get-pro`, a prototype that walks through a full purchase flow but
-  is coded to always fail (`_no_real_io` on that repo) — reads as a live "buy Pro" button, which
-  it isn't. The button (now a `<button>`, not an `<a>`) opens a small `<dialog id="pro-
-  unavailable">` instead, saying it's not available yet. Two elements toggled by the existing
-  `.no-js`/`.js` split (`[data-open-modal]` hidden under `.no-js`, a plain static fallback line
-  hidden under `.js`) so a scripting-off visitor still gets an accurate answer instead of a
-  dead button. Animated with native `@starting-style` + `transition-behavior: allow-discrete`
-  on the `<dialog>` and its `::backdrop` — no extra JS for the animation itself, `.showModal()`/
-  `.close()` drive it directly. Caught and fixed one real gap while wiring the reduced-motion
-  handling: the existing `*, *::before, *::after` blanket rule in the `prefers-reduced-motion:
-  reduce` block does not reach `::backdrop` (it's not `::before`/`::after`), so that pseudo-
-  element needed its own line or a reduced-motion visitor would still see the backdrop fade.
-  **Not verified in a live browser** — no Chrome binary available in-session, same gap the
-  2026-09-14 hero redesign above hit. Checked instead by hand: `node --check` on `main.js`,
-  and grepping that every id/class/data-attribute the three files reference actually lines up.
-
-### Shipped 2026-09-14
-
-- **Honeypot trap channel (`قناة الفخ`) released on the site**, becoming the ninth system. It
-  had been live bot-side since 2026-08-16 and out of the pilot gate since 2026-08-18, but the
-  site had never been updated to reflect that — this was purely a site-sync task, the bot-side
-  feature itself did not change. Added: a `#features` card (icon `i-lock`, reused), a
-  `#dashboard-features` row (no slash commands, same shape as automod/agegate/auto-responses),
-  the hero fact and `#features` lede moved 8 → 9, `llms.txt` and `pricing.txt` updated to
-  match. Card copy deliberately does not claim it catches raiders broadly — see
-  `docs/claude/copy-accuracy.md` for what it actually catches and why that distinction matters.
-  Promotion (community server, directories, social) is the owner's to do; not scoped here.
-- **Visual-polish pass on `index.html`, CSS-only, no markup or content changes.** The owner
-  said the landing page "isn't that good" visually. `assets/css/styles.css` (now `v=2`) got:
-  a fixed low-opacity grain overlay (`body::after`) so the flat black reads as textured
-  rather than sterile; tinted inset-highlight + drop-shadow depth on `.card`/`.plan`/`.cmds`/
-  `.compare` (previously flat border-only panels with no elevation); an icon-badge treatment
-  on `.card__icon` (background + border, reusing `--r-sm`, no new radius); a flat
-  `var(--accent)` indicator bar on the active sidebar tab (`.tab[aria-current="page"]::before`
-  — deliberately unrounded, see the note it carries in-code, to respect the two-radii lock);
-  a static faint dot-grid texture on `.hero`'s own background (separate from the existing
-  animated glow on `.hero::before`, so the two don't fight); hero-fact digits switched to
-  `var(--mono)` to match `.stat__value`'s existing treatment; and a `translateY(-1px)` hover
-  lift on `.btn`, reset under `prefers-reduced-motion` alongside the existing resets. All of
-  it stays inside the documented locks (dark-only, one accent hue, exactly two radii, motion
-  is opacity/transform only) — see `docs/claude/design-and-invariants.md`, whose
-  `var(--accent)` usage count was re-measured (38 → 40 in `styles.css`) rather than
-  hand-incremented, since the arithmetic didn't cleanly reconcile.
-- **Hero redesign, same day, because the polish pass above "looked the exact same."**
-  `styles.css` is now `v=3`. Real structural changes, still CSS-only plus one markup
-  addition, still inside every design lock: hero title scale jumped (`clamp(2rem,5.6vw,
-  3.4rem)` → `clamp(2.6rem,6.8vw,4.5rem)`, tighter line-height); `.hero__inner` is now a
-  flex row at ≥1024px — text in `.hero__content`, a new decorative `.hero__mock` "console"
-  panel beside it (`aria-hidden`, illustrates real commands/features, see
-  `docs/claude/copy-accuracy.md` — do not read it as a `#commands` reference or a real
-  logged event); `.hero__facts` gained a top divider and bigger numerals; `.wrap` padding
-  and `.shead__title` size both increased for more breathing room and a bigger section-
-  heading scale; the last `#features` card (`أوامر واضحة`) now spans two grid columns at
-  ≥900px as a deliberate asymmetric closing beat. `var(--accent)` is now 42 in `styles.css`
-  (50 total with `legal.css`); `dir="ltr"` count is 26 (was 21) — both re-measured, not
-  hand-incremented, in `docs/claude/design-and-invariants.md`. Not verified in a live
-  browser — no headless Chrome/Edge was available in-session (Edge 150 is documented broken
-  for this in `docs/claude/testing-and-traps.md`); a local server was left running on
-  `localhost:8017` for a manual look.
-
-### Shipped 2026-09-06
-
-- **Per-tab `<title>`** — `#top` keeps the full keyworded title (what crawlers see); every
-  other panel shows `"<tab label> | مساعد"` (`initTabs`/`activate` in `main.js`).
-- **Asset cache-busting** — `styles.css` / `legal.css` / `main.js` are now linked as
-  `?v=N`. Bump `N` on every CSS/JS change or the CDN serves the old file for up to 4h after
-  a deploy. See `docs/claude/git-and-deploy.md`. `styles.css` is `v=4` and `main.js` is `v=2`
-  as of 2026-09-17 (the Get-Pro modal — see "Shipped 2026-09-17" below); `legal.css` is
-  still untouched, `v=1`.
-
-### Shipped 2026-09-05
-
-- **On-page SEO fixes** (from the `/seo-audit`): `index.html` `<title>` is now
-  "مساعد بوت ديسكورد عربي للإشراف والحماية" (was brand-only; og/twitter titles match, the
-  legal pages' titles are unchanged). Meta description rewritten to ~150 chars with a CTA
-  (all three description tags in sync; JSON-LD `description` left as the short factual one).
-  The H1 is keyworded ("مساعد، بوت ديسكورد عربي للإشراف وحماية سيرفرك") with the old slogan
-  kept as a small green `.hero__kicker` above it. The four hero teaser cards went `<h2>` →
-  `<p class="card__title">` (they duplicated the `#features` `<h3>`s). Panel headings
-  phrase-shaped: `أنظمة مساعد`, `أوامر مساعد`, `أسعار مساعد`, `أسئلة شائعة عن مساعد` (the
-  sidebar tab labels stay short). No claims or numbers touched.
-- **AI-SEO pass.** `index.html`'s JSON-LD is now a single `@graph`: `Organization`, `WebSite`,
-  `SoftwareApplication`, and a `FAQPage` mirroring the six `#faq` Q&As **word-for-word** —
-  edit a FAQ answer and you edit the schema too (`docs/claude/copy-accuracy.md`). Added
-  `/llms.txt` (llmstxt.org overview) and `/pricing.txt` (machine-readable pricing that
-  mirrors the `#pricing` panel's numbers). A visible "آخر تحديث `<time>`" line in the footer
-  — **bump its date on any real content change to the landing page.** `robots.txt` already
-  allows every AI crawler (`* / Allow: /`), no change needed. Still open (Tier 3): a real
-  `<table>` for `#why-musaed` (blocked by the no-`<table>` design lock), and a fuller
-  `/pricing.txt` once a numeric Pro price exists.
-- JSON-LD `SoftwareApplication` on `index.html` — Arabic name/description,
-  `isAccessibleForFree`, five-item `featureList`, no ratings or install counts. Adds three
-  `musaed.dev` absolute URLs (`docs/claude/placeholders-and-domain.md`).
-- `assets/Pics/musaed-avatar.svg` — self-contained outlined «م» (IBM Plex Sans Arabic 700,
-  pulled from the vendored woff2, no external font `@import`). Matches the PNG mark; not
-  wired into any page. Regenerate with `fonttools` if the glyph needs adjusting.
-- `sitemap.xml` `lastmod` dates refreshed; community invite link updated on every page.
-- First warm-voice pass merged: hero sub, `#about` heading, `#features`/`#trust` ledes,
-  two FAQ answers. Ledes and framing only; card bodies left concrete.
-- Western numerals site-wide; Dyno verdict de-contradicted against its own table; the
-  `#why-musaed` switch got its `vs-in` fade.
-- The `#pricing` and `#why-musaed` panels were committed (they had been sitting uncommitted
-  in the working tree since early September).
-
-### Settled — do not reopen
-
-- **No standalone comparison pages.** The owner rejected `/alternatives/*.html` on 2026-09-05.
-  The MEE6/Dyno comparison stays as the single `#why-musaed` tab. A draft `alternatives/mee6.html`
-  was built and deleted; do not resurrect it. The SEO tradeoff (a hash tab won't rank for
-  "بديل MEE6") is known and accepted.
-- **Numerals are Western (0-9) everywhere.** Converted site-wide 2026-09-05 — hero facts,
-  duration chips, uptime label, `privacy.html`. This is final; do not reintroduce
-  Arabic-Indic digits. (Copy may still *describe* the bot accepting both as duration input —
-  that is a real bot capability, not a site-chrome choice.)
-- **The systems count is 9** as of 2026-09-14, stated as `9 أنظمة` (hero) and `تسعة أنظمة`
-  (`#features` lede). `#features` has 10 cards on purpose: 9 systems + the "أوامر واضحة"
-  meta-card. The honeypot trap channel used to be excluded here as unreleased; it shipped on
-  the site 2026-09-14 — see `docs/claude/copy-accuracy.md` and "Shipped 2026-09-14" below.
-
-### Not the agent's to do
-
-Directory submissions themselves (discordbotlist, disboard, …) need the bot's Discord login
-and manual form work — owner tasks. **top.gg is already done** (live ~2026-08-29).
-`discord.bots.gg` is blocked until Discord verification (~100 servers). Product Hunt is
-deferred. Arabic directories need a name-research pass first. See `directory-tracker.csv`
-for the per-site state.
+- **The redesign's content and structure are the owner's decisions**, made in a separate
+  working session before this integration. Don't second-guess the removal of `#why-musaed`,
+  the simplified `#plans` card, or the bilingual toggle — those were deliberate, not
+  something this integration pass introduced.
+- **Numerals stay Western (0-9).** Unchanged from before the rebuild.

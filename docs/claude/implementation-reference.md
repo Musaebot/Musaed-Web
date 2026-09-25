@@ -22,7 +22,7 @@ history expecting to restore it without checking with the owner first (see root 
 | `404.html` | "هذي القناة مو موجودة" page, Arabic first, no JS. |
 | `assets/Pics/musaed-favicon.svg` | The mint "م" glyph on a dark rounded square. `assets/Pics/musaed-favicon.png` and `musaed-avatar.png` are the `alternate icon`/`apple-touch-icon` fallbacks. |
 
-**Cache-busting:** `styles.css` is `?v=7`, `main.js` is `?v=3`, `i18n.js` and `legal.js` are
+**Cache-busting:** `styles.css` is `?v=7`, `main.js` is `?v=3`, `i18n.js` is `?v=2`, `legal.js` is
 `?v=1`, `legal.css` is `?v=2`. Bump the query string on any further edit to that file — see
 `docs/claude/git-and-deploy.md` for why (that doc's specifics predate this rebuild but the
 cache-busting mechanism itself is unchanged).

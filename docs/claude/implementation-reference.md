@@ -22,7 +22,7 @@ history expecting to restore it without checking with the owner first (see root 
 | `404.html` | "هذي القناة مو موجودة" page, Arabic first, no JS. |
 | `assets/Pics/musaed-favicon.svg` | The mint "م" glyph on a dark rounded square. `assets/Pics/musaed-favicon.png` and `musaed-avatar.png` are the `alternate icon`/`apple-touch-icon` fallbacks. |
 
-**Cache-busting:** `styles.css` is `?v=6`, `main.js` is `?v=3`, `i18n.js` and `legal.js` are
+**Cache-busting:** `styles.css` is `?v=7`, `main.js` is `?v=3`, `i18n.js` and `legal.js` are
 `?v=1`, `legal.css` is `?v=2`. Bump the query string on any further edit to that file — see
 `docs/claude/git-and-deploy.md` for why (that doc's specifics predate this rebuild but the
 cache-busting mechanism itself is unchanged).
@@ -212,14 +212,17 @@ tab (`target="_blank" rel="noopener"`).
   variable font with overlapping contours, which show as inner lines or darker overlaps. Use
   solid colours (as `.layer-n` and `.nf-code` do), or fade a solid copy with `opacity`, which
   flattens the glyphs first (as `.finale-ar::before` does).
-- **iOS WebKit: no `mask-image` on the grids, no animated `background-clip: text`.** Found on a
-  real iPhone (2026-09-25), invisible on desktop and in Playwright's Windows WebKit. The
-  masked `.grid` painted as nothing, so the page was flat black. The finale word, filled by
+- **iOS WebKit: no masked or hard-stop-gradient grid, no animated `background-clip: text`.**
+  Found on a real iPhone (2026-09-25), invisible on desktop and in Playwright's Windows
+  WebKit, so only a real iPhone can confirm a fix here. The `.grid` painted as nothing — the
+  page was flat black — both with its `mask-image` and, after that was removed, still with
+  its `linear-gradient(… 1px, transparent 1px)` line tiles. The finale word, filled by
   animating a `background-size` under `background-clip: text` (inside a composited layer
   from its `filter` and `.reveal`), painted once and never repainted as `--fill` changed.
-  The fixes: the grid fades under a `::after` overlay in `--bg` (each use sets `--fade`),
-  and the finale fill is a solid `::after` copy revealed by `clip-path`. The only mask left
-  is the hero's pointer glow, which is inside `(hover: hover) and (pointer: fine)`.
+  The fixes: the grid is a 56px inline SVG tile that fades under a `::after` overlay in
+  `--bg` (each use sets `--fade`; the SVG's stroke is `--line` spelled out), and the finale
+  fill is a solid `::after` copy revealed by `clip-path`. The hero's pointer glow keeps its
+  gradient + mask, but only inside `(hover: hover) and (pointer: fine)`.
 - **Don't use `<fieldset>` as a flex row.** Legends don't lay out as flex items. The dashboard
   uses `div[role="radiogroup"]` with `aria-labelledby`.
 - **`.card` sets `display: flex` after the bento media queries.** Layout overrides for a
